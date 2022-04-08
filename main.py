@@ -6,12 +6,19 @@ from pyles import Pyles
 
 spheres = pd.read_csv('sphere_parameters.txt', names = ['x', 'y', 'z', 'r', 'n', 'k'])
 particles = Particles(spheres.values[:,0:3], spheres.values[:,3], spheres.values[:,4:])
-particles.compute_unique_refractive_indices()
-# celes = Pyles(particles)
 
-# celes.compute_mie_coefficients()
-
-# fig = go.Figure(go.Scatter3d(
+# fig = go.Figure()
+# fig.add_trace(go.Scatter3d(
+#   x = particles.hull[:,0],
+#   y = particles.hull[:,1],
+#   z = particles.hull[:,2],
+#   mode = 'markers',
+#   marker = dict(
+#     color = "red",
+#     opacity = 1
+#   )
+# ))
+# fig.add_trace(go.Scatter3d(
 #   x = spheres.x,
 #   y = spheres.y,
 #   z = spheres.z,
@@ -21,7 +28,7 @@ particles.compute_unique_refractive_indices()
 #     sizeref = 10,
 #     size = spheres.r * 2,
 #     color = spheres.r,
-#     opacity = 1
+#     opacity = 0.5
 #   )
 # ))
 # fig.show()
