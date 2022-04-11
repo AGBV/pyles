@@ -57,9 +57,6 @@ class Particles:
     hull = ConvexHull(self.pos)
     vert = self.pos[hull.vertices, :]
     self.max_particle_distance = max(pdist(vert))
-    print(self.max_particle_distance)
-
-    
 
   def __setup_impl(self):
     self.compute_unique_refractive_indices()
