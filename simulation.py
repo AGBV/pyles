@@ -22,7 +22,7 @@ class Simulation:
     # return (jS-1)*2*lmax*(lmax+2)+(tau-1)*lmax*(lmax+2)+(l-1)*(l+1)+m+l+1
 
   def compute_mie_coefficients(self):
-    mie_coefficients = np.zeros((self.particles.num_unique_pairs, self.numerics.nmax))
+    self.mie_coefficients = np.zeros((self.particles.num_unique_pairs, self.numerics.nmax))
     print(self.numerics.nmax)
 
     for u_i in range(self.particles.num_unique_pairs):
@@ -30,4 +30,4 @@ class Simulation:
         for l in range(1, self.numerics.lmax+1):
           for m in range(-l,l+1):
             jmult = self.multi2single_index(0, tau, l, m, self.numerics.lmax)
-            mie_coefficients[u_i, jmult] = 1 #T_entry(tau, l, )
+            self.mie_coefficients[u_i, jmult] = 1 #T_entry(tau, l, )
