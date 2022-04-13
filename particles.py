@@ -9,6 +9,14 @@ class Particles:
     self.m = m
     self.type = type
 
+    match self.m.shape[1]:
+      case 1:
+        None
+      case 2:
+        self.m = self.m[:,0] + 1j * self.m[:,1]
+      case _:
+        print('Refractive index should be either complex or a two column matrix!')
+
     self.number = r.shape[0]
     self.__setup_impl()
 

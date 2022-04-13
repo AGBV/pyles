@@ -20,7 +20,7 @@ class Parameters:
 
   def __setup(self):
     self.__compute_omega()
-    self.__compute_Ks
+    self.__compute_Ks()
 
   def __compute_omega(self):
     self.omega = 2 * np.pi / self.wavelength

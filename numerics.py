@@ -5,10 +5,10 @@ from scipy.special import legendre
 from functions.legendre_normalized_trigon import legendre_normalized_trigon
 
 class Numerics:
-  def __init__(self, lmax, polar_angles, azimuth_angles, gpu=False):
+  def __init__(self, lmax, polar_angles, azimuthal_angles, gpu=False):
     self.lmax = lmax
     self.polar_angles = polar_angles
-    self.azumuth_angles = azimuth_angles
+    self.azumuthal_angles = azimuthal_angles
     self.gpu = gpu
 
     self.nmax = Numerics.compute_nmax(lmax)
