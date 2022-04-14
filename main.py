@@ -1,3 +1,4 @@
+from time import time
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -32,7 +33,9 @@ numerics = Numerics(lmax=4,
 
 simulation = Simulation(inputs, numerics)
 simulation.compute_mie_coefficients()
+t = time()
 simulation.compute_translation_table()
+print(time() - t)
 print(simulation.translation_ab5)
 
 # fig = go.Figure()
