@@ -1,8 +1,16 @@
+import logging
+
 import numpy as np
-from sympy.physics.wigner import wigner_3j
+from sympy.physics.wigner import wigner_3j as wigner_3j_sympy
 
 from parameters import Parameters
 from numerics import Numerics
+from scipy.special import spherical_jn, spherical_yn
+
+from functions.wigner3j import wigner3j
+from functions.incidence.initial_field_coefficients_wavebundle_normal_incidence import initial_field_coefficients_wavebundle_normal_incidence
+from functions.incidence.initial_field_coefficients_planewave import initial_field_coefficients_planewave
+
 
 from functions.T_entry import T_entry
 
@@ -10,6 +18,9 @@ class Simulation:
   def __init__(self, parameters: Parameters, numerics: Numerics):
     self.parameters = parameters
     self.numerics = numerics
+
+    self.__setup()
+    self.log = logging.getLogger(__name__)
 
   @staticmethod
   def jmult_max(num_part, lmax):
@@ -19,6 +30,23 @@ class Simulation:
   def multi2single_index(jS,tau,l,m,lmax):
     return jS * 2 * lmax * (lmax+2) + (tau-1) * lmax * (lmax+2) + (l-1)*(l+1) + m + l
     # return (jS-1)*2*lmax*(lmax+2)+(tau-1)*lmax*(lmax+2)+(l-1)*(l+1)+m+l+1
+  
+  def __compute_lookup_particle_distances(self):
+    # add two zeros at beginning to allow interpolation
+    # also in the first segment
+    step = self.numerics.particle_distance_resolution
+    maxdist = self.parameters.particles.max_particle_distance + 3 * self.numerics.particle_distance_resolution
+    self.lookup_particle_distances = np.concatenate((np.array([0]), np.arange(0, maxdist+1, step)))
+
+  def __compute_h3_table(self):
+    self.h3_table = np.zeros((2 * self.numerics.lmax + 1, self.lookup_particle_distances.shape[0]), dtype=complex)
+
+    for p in range(2 * self.numerics.lmax + 1):
+      self.h3_table[p, :] = spherical_jn(p, self.parameters.k_medium * self.lookup_particle_distances)
+
+  def __setup(self):
+    self.__compute_lookup_particle_distances()
+    self.__compute_h3_table()
 
   def compute_mie_coefficients(self):
     self.mie_coefficients = np.zeros(
@@ -50,46 +78,49 @@ class Simulation:
               for m2 in range(-l2, l2+1):
                 j2 = Simulation.multi2single_index(0, tau2, l2, m2, self.numerics.lmax)
                 for p in range(0, 2*self.numerics.lmax+1):
-                  # print(j1,j2,p)
-                  if tau1==tau2:
+                  if tau1 == tau2:
                     self.translation_ab5[j1,j2,p] = np.power(1j, abs(m1 - m2) - abs(m1) - abs(m2) + l2 - l1 + p) * np.power(-1.0, m1-m2) * \
                       np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
                       (l1 * (l1 + 1) + l2 * (l2 + 1) - p * (p + 1)) * np.sqrt(2 * p + 1) * \
-                      wigner_3j(l1, l2, p, m1, -m2, -m1+m2) * wigner_3j(l1, l2, p, 0, 0, 0)
-                  else:
+                      wigner3j(l1, l2, p, m1, -m2, -m1+m2) * wigner3j(l1, l2, p, 0, 0, 0)
+                  elif p> 0:
                     self.translation_ab5[j1,j2,p] = np.power(1j, abs(m1 - m2) - abs(m1) - abs(m2) + l2 - l1 + p) * np.power(-1.0, m1-m2) * \
                       np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
                       np.lib.scimath.sqrt((l1 + l2 + 1 + p) * (l1 + l2 + 1 - p) * (p + l1 - l2) * (p - l1 + l2) * (2 * p + 1)) * \
-                      wigner_3j(l1, l2, p, m1, -m2, -m1+m2) * wigner_3j(l1, l2, p-1, 0, 0, 0)
-    # function translation = translation_table_ab(lmax)
+                      wigner3j(l1, l2, p, m1, -m2, -m1+m2) * wigner3j(l1, l2, p-1, 0, 0, 0)
 
-    # jmax = jmult_max(1,lmax);
+  def compute_initial_field_coefficients(self):
+    self.log.info('compute initial field coefficients ...')
+    
+    if np.isfinite(self.parameters.initial_field.beam_width) and (self.parameters.initial_field.beam_width > 0):
+      self.log.info('  Gaussian beam ...')
+      if self.parameters.initial_field.normal_incidence:
+        self.initial_field_coefficients = initial_field_coefficients_wavebundle_normal_incidence(self)
+      else:
+        self.log.error('  this case is not implemented')
+    else:
+      self.log.info('  plane wave ...')
+      self.initial_field_coefficients = initial_field_coefficients_planewave(self)
+    
+    self.log.info('done')
 
-    # translation.ab5 = zeros(jmax,jmax,2*lmax+1,'single');
 
-    # for tau1 = 1:2
-    #     for l1 = 1:lmax
-    #         for m1 = -l1:l1
-    #             j1 = multi2single_index(1,tau1,l1,m1,lmax);
-    #             for tau2 = 1:2
-    #                 for l2 = 1:lmax
-    #                     for m2 = -l2:l2
-    #                         j2 = multi2single_index(1,tau2,l2,m2,lmax);
-    #                         for p = 0:2*lmax
-    #                             if tau1 == tau2
-    #                                 translation.ab5(j1,j2,p+1) = (1i)^(abs(m1-m2)-abs(m1)-abs(m2)+l2-l1+p) * (-1)^(m1-m2) ...
-    #                                     * sqrt((2*l1+1)*(2*l2+1)/(2*l1*(l1+1)*l2*(l2+1))) * (l1*(l1+1)+l2*(l2+1)-p*(p+1)) * sqrt(2*p+1) ...
-    #                                     * Wigner3j([l1,l2,p],[m1,-m2,-m1+m2]) * Wigner3j([l1,l2,p],[0,0,0]);
-    #                             elseif p > 0
-    #                                 translation.ab5(j1,j2,p+1) = (1i)^(abs(m1-m2)-abs(m1)-abs(m2)+l2-l1+p) * (-1)^(m1-m2) ...
-    #                                     * sqrt((2*l1+1)*(2*l2+1)/(2*l1*(l1+1)*l2*(l2+1))) * sqrt((l1+l2+1+p)*(l1+l2+1-p)*(p+l1-l2)*(p-l1+l2)*(2*p+1)) ...
-    #                                     * Wigner3j([l1,l2,p],[m1,-m2,-m1+m2]) * Wigner3j([l1,l2,p-1],[0,0,0]);
-    #                             end
-    #                         end
-    #                     end
-    #                 end
-    #             end
-    #         end
-    #     end
-    # end
-    # end
+  #   function obj = computeInitialFieldCoefficients(obj)
+  #     fprintf(1,'compute initial field coefficients ...');
+  #     if isfinite(obj.input.initialField.beamWidth) && obj.input.initialField.beamWidth
+  #         fprintf(1,' Gaussian beam ...');
+  #         if obj.input.initialField.normalIncidence
+  #             obj.tables.initialFieldCoefficients = ...
+  #                 initial_field_coefficients_wavebundle_normal_incidence(obj);
+  #         else
+  #             error('this case is not implemented')
+  #         end
+  #     else % infinite or 0 beam width
+  #         fprintf(1,' plane wave ...');
+  #         obj.tables.initialFieldCoefficients = initial_field_coefficients_planewave(obj);
+  #     end
+  #     fprintf(1,' done\n');
+  # end
+
+  def compute_right_hand_side(self):
+    self.right_hand_side = self.mie_coefficients[self.parameters.particles.single_unique_array_idx, :] * self.initial_field_coefficients

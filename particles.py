@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from scipy.spatial import ConvexHull
 from scipy.spatial.distance import pdist
@@ -8,6 +10,8 @@ class Particles:
     self.r = r
     self.m = m
     self.type = type
+    
+    self.log = logging.getLogger(__name__)
 
     match self.m.shape[1]:
       case 1:
@@ -15,7 +19,7 @@ class Particles:
       case 2:
         self.m = self.m[:,0] + 1j * self.m[:,1]
       case _:
-        print('Refractive index should be either complex or a two column matrix!')
+        self.log.error('Refractive index should be either complex or a two column matrix!')
 
     self.number = r.shape[0]
     self.__setup_impl()

@@ -1,7 +1,10 @@
 from time import time
+import logging
+
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+from functions.coupling_matrix_multiply import coupling_matrix_multiply
 
 from particles import Particles
 from initial_field import InitialField
@@ -9,12 +12,22 @@ from parameters import Parameters
 from numerics import Numerics
 from simulation import Simulation
 
+logging.basicConfig(format='%(levelname)s (%(name)s): %(message)s', level=logging.INFO)
+
 spheres = pd.read_csv('data/sphere_parameters.csv', names = ['x', 'y', 'z', 'r', 'n', 'k'])
 wavelength = pd.read_csv('data/lambda.csv', header=None).to_numpy()
-# mie_coefficients = pd.read_csv('data/mie_coefficients.csv', header=None).applymap(lambda val: np.complex(val.replace('i', 'j'))).to_numpy()
+lmax = 4
+mie_coefficients = pd.read_csv('data/test/mie_coefficients.csv', header=None).applymap(lambda val: complex(val.replace('i', 'j'))).to_numpy()
+translation_ab5_csv = pd.read_csv('data/test/translation_ab5.csv', header=None, dtype=str).applymap(lambda val: complex(val.replace('i', 'j'))).to_numpy()
+translation_ab5 = np.zeros((Simulation.jmult_max(1, lmax), Simulation.jmult_max(1, lmax), 2*lmax+1), dtype=complex)
+for k in range(translation_ab5_csv.shape[0]):
+  x = int(np.real(translation_ab5_csv[k, 0]))
+  y = int(np.real(translation_ab5_csv[k, 1]))
+  z = int(np.real(translation_ab5_csv[k, 2]))
+  translation_ab5[x, y, z] = translation_ab5_csv[k, 3]
 
 particles = Particles(spheres.values[:,0:3], spheres.values[:,3], spheres.values[:,4:])
-initial_field = InitialField(beam_width=2000,
+initial_field = InitialField(beam_width=0,
                              focal_point=np.array((0,0,0)),
                              polar_angle=0,
                              azimuthal_angle=0,
@@ -26,18 +39,17 @@ inputs = Parameters(wavelength=wavelength,
                     medium_mefractive_index=np.ones(wavelength.shape) * medium_mefractive_index_scalar,
                     particles=particles,
                     initial_field=initial_field)
-numerics = Numerics(lmax=4,
+numerics = Numerics(lmax=lmax,
                     polar_angles=np.arange(0, np.pi * (1 + 1/5e3), np.pi / 5e3),
                     azimuthal_angles=np.arange(0, np.pi * (2 + 1/1e2), np.pi / 1e2),
                     gpu=False)
 
 simulation = Simulation(inputs, numerics)
 simulation.compute_mie_coefficients()
-t = time()
 simulation.compute_translation_table()
-print(time() - t)
-print(simulation.translation_ab5)
 
+simulation.compute_initial_field_coefficients()
+# coupling_matrix_multiply()
 # fig = go.Figure()
 # fig.add_trace(go.Scatter3d(
 #   x = spheres.x,

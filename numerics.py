@@ -1,20 +1,25 @@
-from distutils.log import warn
+import logging
+
 import numpy as np
 from scipy.special import legendre
 
 from functions.legendre_normalized_trigon import legendre_normalized_trigon
 
 class Numerics:
-  def __init__(self, lmax, polar_angles, azimuthal_angles, gpu=False):
+  def __init__(self, lmax, polar_angles, azimuthal_angles, gpu=False, particle_distance_resolution = 10.0):
     self.lmax = lmax
     self.polar_angles = polar_angles
     self.azumuthal_angles = azimuthal_angles
+
     self.gpu = gpu
+    self.particle_distance_resolution = particle_distance_resolution
 
     self.nmax = Numerics.compute_nmax(lmax)
+    
+    self.log = logging.getLogger(__name__)
 
     if gpu != False:
-      warn("GPU functionality isn't implemented yet!")
+      self.log.warning('GPU functionality isn\'t implemented yet!\nReverting to CPU.')
 
   @staticmethod
   def compute_nmax(lmax):
