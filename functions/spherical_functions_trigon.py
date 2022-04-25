@@ -4,59 +4,43 @@ def spherical_functions_trigon(theta, lmax):
   ct = np.cos(np.ravel(theta))
   st = np.sin(np.ravel(theta))
 
-  plm = np.zeros((lmax+1, lmax+1, ct.shape[0]))
-  pilm = np.zeros(plm.shape)
-  taulm = np.zeros(plm.shape)
-  pprimel0 = np.zeros(lmax+1)
+  plm = np.zeros((lmax+1, lmax+1, ct.shape[0])) * np.nan
+  pilm = np.zeros(plm.shape) * np.nan
+  taulm = np.zeros(plm.shape) * np.nan
+  pprimel0 = np.zeros((lmax+1, ct.shape[0])) * np.nan
 
   plm[0,0,:] = np.sqrt(1/2) * np.ones_like(ct)
   plm[1,0,:] = np.sqrt(3/2) * ct
 
-# function [pilm,taulm] = spherical_functions_trigon(ct,st,lmax)
+  pilm[0,0,:] = np.zeros_like(ct)
+  pilm[1,0,:] = np.zeros_like(ct)
 
-# plm = cell(lmax+1,lmax+1);  % first index: l+1, second index: m+1, inside each cell: same dimension as kpar
-# pilm = cell(lmax+1,lmax+1);  % first index: l+1, second index: m+1, inside each cell: same dimension as kpar
-# taulm = cell(lmax+1,lmax+1);  % first index: l+1, second index: m+1, inside each cell: same dimension as kpar
-# pprimel0 = cell(lmax+1);  % first index: l+1, second index: m+1, inside each cell: same dimension as kpar
+  pprimel0[0,:] = np.zeros_like(ct)
+  pprimel0[1,:] = np.sqrt(3) * plm[0,0,:]
 
-# plm{1,1} = sqrt(2)/2*ones(size(ct),'like',ct);  % P_0
-# plm{2,1} = sqrt(3/2)*ct; % P_1
+  taulm[0,0,:] = -st * pprimel0[0,:]
+  taulm[1,0,:] = -st * pprimel0[1,:]
+  
+  for l in range(1, lmax):
+    plm[l+1,0,:] = 1/(l+1) * np.sqrt((2*l + 1) * (2*l + 3)) * ct * plm[l,0,:] - l/(l+1) * np.sqrt((2*l + 3) / (2*l - 1)) * plm[l-1,0,:]
+    pilm[l+1,0,:] = np.zeros_like(ct)
+    pprimel0[l+1,:] = np.sqrt((2*l + 3)/(2*l + 1)) * ((l+1) * plm[l,0,:] + ct * pprimel0[l,:])
+    taulm[l+1,0,:] = -st * pprimel0[l+1,:]
 
-# pilm{1,1} = zeros(size(ct),'like',ct);  % pi_0^0
-# pilm{2,1} = zeros(size(ct),'like',ct); % pi_1^0
-
-# pprimel0{1} = zeros(size(ct),'like',ct);  % P'_0^0
-# pprimel0{2} = sqrt(3)*plm{1,1}; % P'_1^0
-
-# taulm{1,1} = -st.*pprimel0{1};  % tau_0^0
-# taulm{2,1} = -st.*pprimel0{2};  % tau_1^0
-
-# for l = 1:lmax-1  % l+1
-#     lp1=l+1;  % as index for cell array
-#     plm{lp1+1,1} = 1/(l+1)*sqrt((2*l+1)*(2*l+3))*ct.*plm{lp1,1}- ...
-#                    l/lp1*sqrt((2*l+3)/(2*l-1))*plm{lp1-1,1};
-#     pilm{lp1+1,1} = zeros(size(ct),'like',ct);
-#     coeff = sqrt((2*(l+1)+1)/(2*(l+1)-1));
-#     pprimel0{lp1+1} = (l+1)*coeff*plm{lp1,1}+coeff*ct.*pprimel0{lp1};
-#     taulm{lp1+1,1} = -st.*pprimel0{lp1+1};
-# end
-
-# for m=1:lmax
-#     mp1=m+1;
-#     plm{mp1-1,mp1}=zeros(size(ct),'like',ct);
-#     pilm{mp1-1,mp1}=zeros(size(ct),'like',ct);
-#     coeff = sqrt((2*m+1)/2/factorial(2*m))*prod((2*m-1):-2:1);
-#     plm{mp1,mp1}=coeff*st.^m;
-#     pilm{mp1,mp1}=coeff*st.^(m-1);
-#     taulm{mp1,mp1}=m*ct.*pilm{mp1,mp1};
-#     for l=m:lmax-1
-#         lp1=l+1;
-#         coeff1 = sqrt((2*l+1)*(2*l+3)/(l+1-m)/(l+1+m))*ct;
-#         coeff2 = sqrt((2*l+3)*(l-m)*(l+m)/(2*l-1)/(l+1-m)/(l+1+m));
-#         plm{lp1+1,mp1}=coeff1.*plm{lp1,mp1} - coeff2*plm{lp1-1,mp1};
-#         pilm{lp1+1,mp1}=coeff1.*pilm{lp1,mp1} - coeff2*pilm{lp1-1,mp1};
-#         taulm{lp1+1,mp1}=(l+1)*ct.*pilm{lp1+1,mp1}- ...
-#            (l+1+m)*sqrt((2*(l+1)+1)*(l+1-m)/(2*(l+1)-1)/(l+1+m)).*pilm{lp1,mp1};
-#     end
-# end
-# end
+  for m in range(1,lmax+1):
+    plm[m-1,m,:] = np.zeros_like(ct)
+    pilm[m-1,m,:] = np.zeros_like(ct)
+    coeff = np.sqrt((2*m + 1) / 2 / np.math.factorial(2*m)) * np.prod(np.arange(1, 2*m, 2))
+    plm[m,m,:] = coeff * np.power(st, m)
+    pilm[m,m,:] = coeff * np.power(st, m-1)
+    taulm[m,m,:] = m * ct * pilm[m,m,:]
+    for l in range(m,lmax):
+      coeff1 = np.sqrt((2*l + 1) * (2*l + 3) / (l + 1 - m) / (l + 1 + m)) * ct
+      coeff2 = np.sqrt((2*l + 3) * (l - m) * (l + m) / (2*l - 1) / (l + 1 - m) / (l + 1 + m))
+      plm[l+1,m,:] = coeff1 * plm[l,m,:] - coeff2 * plm[l-1,m,:]
+      pilm[l+1,m,:] = coeff1 * pilm[l,m,:] - coeff2 * pilm[l-1,m,:]
+      taulm[l+1,m,:] = (l + 1) * ct * pilm[l+1,m,:] - (l + 1 + m) * np.sqrt((2 * l + 3) * (l + 1 -m) / (2 * l + 1) / (l + 1 + m)) * pilm[l,m,:]
+  
+  pilm  = np.reshape(pilm,  np.concatenate(([lmax+1, lmax+1], theta.shape)))
+  taulm = np.reshape(taulm, np.concatenate(([lmax+1, lmax+1], theta.shape)))
+  return pilm, taulm
