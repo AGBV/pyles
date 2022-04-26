@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from functions.coupling_matrix_multiply import coupling_matrix_multiply
+# from functions.coupling_matrix_multiply import coupling_matrix_multiply
 
 from particles import Particles
 from initial_field import InitialField

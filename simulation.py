@@ -8,8 +8,9 @@ from numerics import Numerics
 from scipy.special import spherical_jn, spherical_yn
 
 from functions.wigner3j import wigner3j
-from functions.incidence.initial_field_coefficients_wavebundle_normal_incidence import initial_field_coefficients_wavebundle_normal_incidence
-from functions.incidence.initial_field_coefficients_planewave import initial_field_coefficients_planewave
+from functions.spherical_functions_trigon import spherical_functions_trigon
+# from functions.incidence.initial_field_coefficients_wavebundle_normal_incidence import initial_field_coefficients_wavebundle_normal_incidence
+# from functions.incidence.initial_field_coefficients_planewave import initial_field_coefficients_planewave
 
 
 from functions.T_entry import T_entry
@@ -95,32 +96,96 @@ class Simulation:
     if np.isfinite(self.parameters.initial_field.beam_width) and (self.parameters.initial_field.beam_width > 0):
       self.log.info('  Gaussian beam ...')
       if self.parameters.initial_field.normal_incidence:
-        self.initial_field_coefficients = initial_field_coefficients_wavebundle_normal_incidence(self)
+        pass
+        # self.initial_field_coefficients = initial_field_coefficients_wavebundle_normal_incidence(self)
       else:
         self.log.error('  this case is not implemented')
     else:
       self.log.info('  plane wave ...')
-      self.initial_field_coefficients = initial_field_coefficients_planewave(self)
+      self.initial_field_coefficients = self.initial_field_coefficients_planewave()
     
     self.log.info('done')
 
-
-  #   function obj = computeInitialFieldCoefficients(obj)
-  #     fprintf(1,'compute initial field coefficients ...');
-  #     if isfinite(obj.input.initialField.beamWidth) && obj.input.initialField.beamWidth
-  #         fprintf(1,' Gaussian beam ...');
-  #         if obj.input.initialField.normalIncidence
-  #             obj.tables.initialFieldCoefficients = ...
-  #                 initial_field_coefficients_wavebundle_normal_incidence(obj);
-  #         else
-  #             error('this case is not implemented')
-  #         end
-  #     else % infinite or 0 beam width
-  #         fprintf(1,' plane wave ...');
-  #         obj.tables.initialFieldCoefficients = initial_field_coefficients_planewave(obj);
-  #     end
-  #     fprintf(1,' done\n');
-  # end
-
   def compute_right_hand_side(self):
     self.right_hand_side = self.mie_coefficients[self.parameters.particles.single_unique_array_idx, :] * self.initial_field_coefficients
+
+  @staticmethod
+  def transformation_coefficients(pilm, taulm, tau, l, m, pol, dagger: bool=False):
+    if dagger:
+      ifac = -1j
+    else:
+      ifac = 1j
+
+    if tau == pol:
+      spher_fun = taulm[l, np.abs(m)]
+    else:
+      spher_fun = m * pilm[l, np.abs(m)]
+
+    return -1 / np.power(ifac, l+1) / np.sqrt(2 * l * (l+1)) * (ifac * (pol == 1) + (pol == 2)) * spher_fun
+
+  def initial_field_coefficients_planewave(self):
+    lmax = self.numerics.lmax
+    E0 = self.parameters.initial_field.amplitude
+    k = self.parameters.k_medium
+
+    beta = self.parameters.initial_field.polar_angle
+    cb = np.cos(beta)
+    sb = np.sin(beta)
+    alpha = self.parameters.initial_field.azimuthal_angle
+
+    # pi and tau symbols for transformation matrix B_dagger
+    pilm,taulm = spherical_functions_trigon(beta,lmax)
+
+    # cylindrical coordinates for relative particle positions
+    relativeParticlePositions = self.parameters.particles.pos - self.parameters.initial_field.focal_point
+    kvec = k * np.array((sb * np.cos(alpha), sb * np.sin(alpha), cb))
+    eikr = np.exp(1j * relativeParticlePositions * kvec)
+
+    # clean up some memory?
+    del (k, beta, cb, sb, kvec, relativeParticlePositions)
+
+    aI = np.zeros((self.parameters.particles.number, self.numerics.nmax))
+    for m in range(-lmax, lmax+1):
+      for tau in range(1, 3):
+        for l in range(1, np.abs(m)+1):
+          n = self.multi2single_index(0, tau, l, m, lmax)
+          print(np.exp(-1j * m * alpha).shape)
+          print(eikr.shape)
+          print(self.transformation_coefficients(pilm, taulm, tau, l, m, self.parameters.initial_field.pol, dagger=True))
+          aI[:,n] = 4 * E0 * np.exp(-1j * m * alpha) * eikr * self.transformation_coefficients(pilm, taulm, tau, l, m, self.parameters.initial_field.pol, dagger=True)
+
+    return aI
+
+
+# function aI = initial_field_coefficients_planewave(simulation)
+
+# lmax = simulation.numerics.lmax;
+# E0 = simulation.input.initialField.amplitude;
+# k = simulation.input.k_medium;
+
+# beta = simulation.input.initialField.polarAngle;
+# cb = cos(beta);
+# sb = sin(beta);
+# alpha = simulation.input.initialField.azimuthalAngle;
+
+# % pi and tau symbols for transformation matrix B_dagger
+# [pilm,taulm] = spherical_functions_trigon(cb,sb,lmax);  % Nk x 1
+
+# % cylindrical coordinates for relative particle positions
+# relativeParticlePositions = simulation.input.particles.positionArray - simulation.input.initialField.focalPoint;
+# kvec = k*[sb*cos(alpha);sb*sin(alpha);cb];
+# eikr = exp(1i*relativeParticlePositions*kvec);
+
+# clear k beta cb sb kvec relativeParticlePositions % clean up some memory?
+
+# % compute initial field coefficients
+# aI = simulation.numerics.deviceArray(zeros(simulation.input.particles.number,simulation.numerics.nmax,'single'));
+# for m=-lmax:lmax
+#     for tau=1:2
+#         for l=max(1,abs(m)):lmax
+#             n=multi2single_index(1,tau,l,m,lmax);
+#             aI(:,n) = 4 * E0 * exp(-1i*m*alpha) .* eikr .* transformation_coefficients(pilm,taulm,tau,l,m,simulation.input.initialField.pol,'dagger');
+#         end
+#     end
+# end
+# end

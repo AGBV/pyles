@@ -1,10 +1,10 @@
 import logging
 
 import numpy as np
+import sympy as sym
 from scipy.special import legendre
 
 from functions.legendre_normalized_trigon import legendre_normalized_trigon
-
 class Numerics:
   def __init__(self, lmax, polar_angles, azimuthal_angles, gpu=False, particle_distance_resolution = 10.0):
     self.lmax = lmax
@@ -32,11 +32,9 @@ class Numerics:
       2 * self.lmax + 1,
       self.lmax+1))
     
-    import sympy as sym
-    from functions.legendre_normalized_trigon import legendre_normalized_trigon
     ct = sym.Symbol('ct')
     st = sym.Symbol('st')
-    plm = legendre_normalized_trigon(ct, 2*self.lmax, y=st)
+    plm = legendre_normalized_trigon(ct, y=st, lmax=2*self.lmax)
     
     for l in range(2*self.lmax+1):
       for m in range(l+1):

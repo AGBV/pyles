@@ -1,6 +1,10 @@
 import numpy as np
 
 def spherical_functions_trigon(theta, lmax):
+  size = np.array([1])
+  if isinstance(theta, np.ndarray):
+    size = theta.shape
+  
   ct = np.cos(np.ravel(theta))
   st = np.sin(np.ravel(theta))
 
@@ -41,6 +45,6 @@ def spherical_functions_trigon(theta, lmax):
       pilm[l+1,m,:] = coeff1 * pilm[l,m,:] - coeff2 * pilm[l-1,m,:]
       taulm[l+1,m,:] = (l + 1) * ct * pilm[l+1,m,:] - (l + 1 + m) * np.sqrt((2 * l + 3) * (l + 1 -m) / (2 * l + 1) / (l + 1 + m)) * pilm[l,m,:]
   
-  pilm  = np.reshape(pilm,  np.concatenate(([lmax+1, lmax+1], theta.shape)))
-  taulm = np.reshape(taulm, np.concatenate(([lmax+1, lmax+1], theta.shape)))
+  pilm  = np.reshape(pilm,  np.concatenate(([lmax+1, lmax+1], size)))
+  taulm = np.reshape(taulm, np.concatenate(([lmax+1, lmax+1], size)))
   return pilm, taulm
