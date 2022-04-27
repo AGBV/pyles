@@ -34,7 +34,9 @@ jobs:
       - name: Override Coverage Source Path for Sonar
         run: |
           ls -la /home/runner/work/pyles/pyles
+          cat /home/runner/work/pyles/pyles/coverage.xml
           sed -i "s/<source>\/home\/runner\/work\/repo<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/pyles/pyles/coverage.xml
+          cat /home/runner/work/pyles/pyles/coverage.xml
 
       # - name: Analysing the code with pylint
       #   continue-on-error: true
