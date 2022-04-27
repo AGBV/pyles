@@ -35,7 +35,7 @@ jobs:
         run: |
           ls -la /home/runner/work/pyles/pyles
           cat /home/runner/work/pyles/pyles/coverage.xml
-          sed -i "s/<source>\/home\/runner\/work\/repo<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/pyles/pyles/coverage.xml
+          sed -i "s/<source>\/home\/runner\/work\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/pyles/pyles/coverage.xml
           cat /home/runner/work/pyles/pyles/coverage.xml
 
       # - name: Analysing the code with pylint
