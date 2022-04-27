@@ -6,11 +6,11 @@ import numpy as np
 import plotly.graph_objects as go
 # from functions.coupling_matrix_multiply import coupling_matrix_multiply
 
-from particles import Particles
-from initial_field import InitialField
-from parameters import Parameters
-from numerics import Numerics
-from simulation import Simulation
+from pyles.particles import Particles
+from pyles.initial_field import InitialField
+from pyles.parameters import Parameters
+from pyles.numerics import Numerics
+from pyles.simulation import Simulation
 
 logging.basicConfig(format='%(levelname)s (%(name)s): %(message)s', level=logging.INFO)
 
