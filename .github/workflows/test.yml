@@ -31,6 +31,9 @@ jobs:
           python -m pytest -v --cov --cov-report=xml --cov-report=html
           python -m coverage xml -i
 
+      - name: Override Coverage Source Path for Sonar
+        run: sed -i "s/<source>\/home\/runner\/work\/repo<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/repo/pyles/pyles/coverage.xml
+
       # - name: Analysing the code with pylint
       #   continue-on-error: true
       #   run: |
