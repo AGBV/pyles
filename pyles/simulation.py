@@ -10,7 +10,7 @@ from pyles.functions.wigner3j import wigner3j
 from pyles.functions.spherical_functions_trigon import spherical_functions_trigon
 # from functions.incidence.initial_field_coefficients_wavebundle_normal_incidence import initial_field_coefficients_wavebundle_normal_incidence
 # from functions.incidence.initial_field_coefficients_planewave import initial_field_coefficients_planewave
-from pyles.functions.t_entry import T_entry
+from pyles.functions.t_entry import t_entry
 
 class Simulation:
   def __init__(self, parameters: Parameters, numerics: Numerics):
@@ -58,7 +58,7 @@ class Simulation:
         for l in range(1, self.numerics.lmax+1):
           for m in range(-l,l+1):
             jmult = self.multi2single_index(0, tau, l, m, self.numerics.lmax)
-            self.mie_coefficients[u_i, jmult, :] = T_entry(tau=tau, l=l,
+            self.mie_coefficients[u_i, jmult, :] = t_entry(tau=tau, l=l,
               kM = self.parameters.k_medium,
               kS = self.parameters.omega * self.parameters.particles.unique_radius_index_pairs[u_i, 1],
               R = np.real(self.parameters.particles.unique_radius_index_pairs[u_i, 0]))
