@@ -48,7 +48,7 @@ simulation = Simulation(inputs, numerics)
 simulation.compute_mie_coefficients()
 simulation.compute_translation_table()
 
-simulation.compute_initial_field_coefficients()
+# simulation.compute_initial_field_coefficients()
 # coupling_matrix_multiply()
 # fig = go.Figure()
 # fig.add_trace(go.Scatter3d(

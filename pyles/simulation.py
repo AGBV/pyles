@@ -2,18 +2,15 @@ import logging
 
 import numpy as np
 from sympy.physics.wigner import wigner_3j as wigner_3j_sympy
-
-from parameters import Parameters
-from numerics import Numerics
 from scipy.special import spherical_jn, spherical_yn
 
-from functions.wigner3j import wigner3j
-from functions.spherical_functions_trigon import spherical_functions_trigon
+from pyles.parameters import Parameters
+from pyles.numerics import Numerics
+from pyles.functions.wigner3j import wigner3j
+from pyles.functions.spherical_functions_trigon import spherical_functions_trigon
 # from functions.incidence.initial_field_coefficients_wavebundle_normal_incidence import initial_field_coefficients_wavebundle_normal_incidence
 # from functions.incidence.initial_field_coefficients_planewave import initial_field_coefficients_planewave
-
-
-from functions.T_entry import T_entry
+from pyles.functions.T_entry import T_entry
 
 class Simulation:
   def __init__(self, parameters: Parameters, numerics: Numerics):

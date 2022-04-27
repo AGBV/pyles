@@ -4,7 +4,8 @@ import numpy as np
 import sympy as sym
 from scipy.special import legendre
 
-from functions.legendre_normalized_trigon import legendre_normalized_trigon
+from pyles.functions.legendre_normalized_trigon import legendre_normalized_trigon
+
 class Numerics:
   def __init__(self, lmax, polar_angles, azimuthal_angles, gpu=False, particle_distance_resolution = 10.0):
     self.lmax = lmax

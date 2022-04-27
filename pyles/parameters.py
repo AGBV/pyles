@@ -1,7 +1,7 @@
 import numpy as np
 
-from particles import Particles
-from initial_field import InitialField
+from pyles.particles import Particles
+from pyles.initial_field import InitialField
 
 class Parameters:
 

@@ -16,7 +16,7 @@ from pyles.functions.legendre_normalized_trigon import legendre_normalized_trigo
 class TestTrigonFunctions(unittest.TestCase):
 
   def test_legendre_normalized_trigon(self):
-    p = re.compile('legendre_normalized_trigon_lmax_(\d+)_dim_(.*)\.csv')
+    p = re.compile(r'legendre_normalized_trigon_lmax_(\d+)_dim_(.*)\.csv')
     for data_file in glob.glob('tests/data/legendre_normalized_trigon_*.csv'):
 
       res = p.search(data_file)
@@ -32,7 +32,7 @@ class TestTrigonFunctions(unittest.TestCase):
       np.testing.assert_array_almost_equal(plm,  plm_test,  decimal=10, err_msg='P_lm do not match in %s' % (data_file), verbose=True)
 
   def test_spherical_functions_trigon(self):
-    p = re.compile('spherical_functions_trigon_lmax_(\d+)_dim_(.*)\.csv')
+    p = re.compile(r'spherical_functions_trigon_lmax_(\d+)_dim_(.*)\.csv')
     for data_file in glob.glob('tests/data/spherical_functions_trigon_*.csv'):
 
       res = p.search(data_file)
