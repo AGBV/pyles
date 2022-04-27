@@ -10,7 +10,7 @@ from pyles.functions.wigner3j import wigner3j
 from pyles.functions.spherical_functions_trigon import spherical_functions_trigon
 # from functions.incidence.initial_field_coefficients_wavebundle_normal_incidence import initial_field_coefficients_wavebundle_normal_incidence
 # from functions.incidence.initial_field_coefficients_planewave import initial_field_coefficients_planewave
-from pyles.functions.T_entry import T_entry
+from pyles.functions.t_entry import T_entry
 
 class Simulation:
   def __init__(self, parameters: Parameters, numerics: Numerics):

@@ -17,6 +17,7 @@ logging.basicConfig(format='%(levelname)s (%(name)s): %(message)s', level=loggin
 spheres = pd.read_csv('data/sphere_parameters.csv', names = ['x', 'y', 'z', 'r', 'n', 'k'])
 wavelength = pd.read_csv('data/lambda.csv', header=None).to_numpy()
 lmax = 4
+
 mie_coefficients = pd.read_csv('data/test/mie_coefficients.csv', header=None).applymap(lambda val: complex(val.replace('i', 'j'))).to_numpy()
 translation_ab5_csv = pd.read_csv('data/test/translation_ab5.csv', header=None, dtype=str).applymap(lambda val: complex(val.replace('i', 'j'))).to_numpy()
 translation_ab5 = np.zeros((Simulation.jmult_max(1, lmax), Simulation.jmult_max(1, lmax), 2*lmax+1), dtype=complex)

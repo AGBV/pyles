@@ -1,6 +1,6 @@
 from scipy.special import spherical_jn, spherical_yn
 
-def T_entry(tau, l, kM, kS, R, field_type = 'scattered'):
+def t_entry(tau, l, kM, kS, R, field_type = 'scattered'):
   m  = kS / kM
   x  = kM * R
   mx = kS * R
