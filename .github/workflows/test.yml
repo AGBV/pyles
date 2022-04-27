@@ -35,11 +35,8 @@ jobs:
       #   run: |
       #     pylint src/git_graph_automation
 
-      - name: SonarCloud Scan
+      - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.verbose=true
