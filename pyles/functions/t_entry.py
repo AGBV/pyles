@@ -1,9 +1,15 @@
 from scipy.special import spherical_jn, spherical_yn
 
-def t_entry(tau, l, kM, kS, R, field_type = 'scattered'):
-  m  = kS / kM
-  x  = kM * R
-  mx = kS * R
+def t_entry(tau, l, k_medium, k_sphere, radius, field_type = 'scattered'):
+  """
+  Computes an entry in the T Matrix for a given l, k, and tau
+  
+  **Note**: scipy.special has also derivative function. Why is it not the same?
+  """
+
+  m  = k_sphere / k_medium
+  x  = k_medium * radius
+  mx = k_sphere * radius
 
   jx  = spherical_jn(l, x)
   jmx = spherical_jn(l, mx)

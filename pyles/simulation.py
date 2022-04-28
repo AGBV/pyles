@@ -13,6 +13,8 @@ from pyles.functions.spherical_functions_trigon import spherical_functions_trigo
 from pyles.functions.t_entry import t_entry
 
 class Simulation:
+  """Pyles Simulation Class"""
+
   def __init__(self, parameters: Parameters, numerics: Numerics):
     self.parameters = parameters
     self.numerics = numerics
