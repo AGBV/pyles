@@ -42,9 +42,9 @@ class TestScattering(unittest.TestCase):
             for m in range(-l,l+1):
               jmult = multi2single_index(0, tau, l, m, lmax)
               mie[u_i,jmult] = t_entry(tau=tau, l=l,
-                kM = omega * medium,
-                kS = omega * ref_idx[u_i],
-                R = radii[u_i])
+                k_medium = omega * medium,
+                k_sphere = omega * ref_idx[u_i],
+                radius = radii[u_i])
 
       np.testing.assert_array_almost_equal(mie,  mie_test,  decimal=6, err_msg='Mie coefficients do not match in %s' % (data_file), verbose=True)
 
