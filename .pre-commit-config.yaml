@@ -1,9 +1,7 @@
 repos:
-    - repo: local
-      hooks:
-          - id: unittests
-            name: run unit tests
-            entry: python -m unittest
-            language: system
-            pass_filenames: false
-            args: ["discover"]
+  - repo: https://github.com/SoulEater45/pre-commit-python
+    rev: 3f2faba330aebe53688b9c800edc2ba4483c661b
+    hooks:
+      - id: python_unittest
+        alias: python_unittest_check
+        verbose: true
