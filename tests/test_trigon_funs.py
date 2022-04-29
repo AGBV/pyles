@@ -23,9 +23,9 @@ class TestTrigonFunctions(unittest.TestCase):
       lmax = int(res.group(1))
       dim = [int(x) for x in res.group(2).split('x')]
 
-      data = pd.read_csv(data_file, header=None)
-      theta     = np.reshape(data.to_numpy()[:np.prod(dim),0], dim, order='F')
-      plm_test  = np.reshape(data.to_numpy()[:, 1], np.concatenate(([lmax+1, lmax+1], dim)), order='F')
+      data = pd.read_csv(data_file, header=None).to_numpy()
+      theta     = np.reshape(data[:np.prod(dim),0], dim, order='F')
+      plm_test  = np.reshape(data[:, 1], np.concatenate(([lmax+1, lmax+1], dim)), order='F')
 
       plm = legendre_normalized_trigon(np.radians(theta), lmax=lmax)
 
@@ -39,10 +39,10 @@ class TestTrigonFunctions(unittest.TestCase):
       lmax = int(res.group(1))
       dim = [int(x) for x in res.group(2).split('x')]
 
-      data = pd.read_csv(data_file, header=None)
-      theta      = np.reshape(data.to_numpy()[:np.prod(dim),0], dim, order='F')
-      pilm_test  = np.reshape(data.to_numpy()[:, 1], np.concatenate(([lmax+1, lmax+1], dim)), order='F')
-      taulm_test = np.reshape(data.to_numpy()[:, 2], np.concatenate(([lmax+1, lmax+1], dim)), order='F')
+      data = pd.read_csv(data_file, header=None).to_numpy()
+      theta      = np.reshape(data[:np.prod(dim),0], dim, order='F')
+      pilm_test  = np.reshape(data[:, 1], np.concatenate(([lmax+1, lmax+1], dim)), order='F')
+      taulm_test = np.reshape(data[:, 2], np.concatenate(([lmax+1, lmax+1], dim)), order='F')
 
       pilm, taulm = spherical_functions_trigon(np.radians(theta), lmax)
 

@@ -15,7 +15,7 @@ class TestScattering(unittest.TestCase):
 
   def test_t_entry_single_wavelength(self):
     p = re.compile(r'mie_coefficients_lmax_(\d+)_wavelength_(\d+\.?\d*)_medium_(-?\d+\.?\d*)_(-?\d+\.?\d*)\.csv')
-    for data_file in glob.glob('tests/data/mie_coefficients_*.csv'):
+    for data_file in glob.glob('tests/data/mie_coefficients_lmax*.csv'):
 
       res = p.search(data_file)
       lmax = int(res.group(1))
@@ -33,7 +33,7 @@ class TestScattering(unittest.TestCase):
 
       mie = np.zeros(
         (data.shape[0],
-        data.shape[1]-2),
+        2 * lmax * (lmax + 2)),
         dtype=complex)
       
       for u_i in range(data.shape[0]):
@@ -46,7 +46,44 @@ class TestScattering(unittest.TestCase):
                 k_sphere = omega * ref_idx[u_i],
                 radius = radii[u_i])
 
-      np.testing.assert_array_almost_equal(mie,  mie_test,  decimal=6, err_msg='Mie coefficients do not match in %s' % (data_file), verbose=True)
+      np.testing.assert_array_almost_equal(mie,  mie_test,  decimal=5, err_msg='Mie coefficients do not match in %s' % (data_file), verbose=True)
+
+  def test_t_entry_multiple_wavelength(self):
+    p = re.compile(r'mie_coefficients_.+_lmax_(\d+)_(.+)\.csv')
+    for data_file in glob.glob('tests/data/mie_coefficients_*_lmax*.csv'):
+      
+      res = p.search(data_file)
+      lmax = int(res.group(1))
+
+      data = pd.read_csv(data_file, header=None).applymap(lambda val: complex(str(val).replace('i', 'j'))).to_numpy()
+
+      num_particles = np.where(np.isnan(data[:,2]))[0][0]
+
+      wavelength  = np.real(data[:,0])
+      med_ref_idx = data[:,1]
+      radii       = np.real(data[:num_particles,2])
+      ref_idx     = data[:num_particles,3]
+      mie_test    = np.reshape(data[:,4:].T, (num_particles, 2 * lmax * (lmax + 2), wavelength.size), order='F');
+
+      omega = 2 * np.pi / wavelength
+
+      mie = np.zeros(
+        (num_particles,
+        2 * lmax * (lmax + 2),
+        wavelength.size),
+        dtype=complex)
+      
+      for u_i in range(num_particles):
+        for tau in range(1, 3):
+          for l in range(1, lmax+1):
+            for m in range(-l,l+1):
+              jmult = multi2single_index(0, tau, l, m, lmax)
+              mie[u_i,jmult,:] = t_entry(tau=tau, l=l,
+                k_medium = omega * med_ref_idx,
+                k_sphere = omega * ref_idx[u_i],
+                radius = radii[u_i])
+
+      np.testing.assert_array_almost_equal(mie,  mie_test,  decimal=5, err_msg='Mie coefficients do not match in %s' % (data_file), verbose=True)
 
 if __name__ == '__main__':
   unittest.main()
