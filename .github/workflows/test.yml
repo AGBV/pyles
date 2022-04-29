@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - "pyles/**"
+      - "tests/**"
+      - ".github/workflows/test.yml"
 
 jobs:
   coverage:
