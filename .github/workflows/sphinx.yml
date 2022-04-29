@@ -9,6 +9,10 @@ jobs:
   docs:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      packages: write
+
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
