@@ -1,12 +1,11 @@
 import logging
 
 import numpy as np
-from sympy.physics.wigner import wigner_3j as wigner_3j_sympy
-from scipy.special import spherical_jn, spherical_yn
+import pywigxjpf as wig
+from scipy.special import spherical_jn
 
 from pyles.parameters import Parameters
 from pyles.numerics import Numerics
-from pyles.functions.wigner3j import wigner3j
 from pyles.functions.spherical_functions_trigon import spherical_functions_trigon
 # from functions.incidence.initial_field_coefficients_wavebundle_normal_incidence import initial_field_coefficients_wavebundle_normal_incidence
 # from functions.incidence.initial_field_coefficients_planewave import initial_field_coefficients_planewave
@@ -61,13 +60,16 @@ class Simulation:
           for m in range(-l,l+1):
             jmult = self.multi2single_index(0, tau, l, m, self.numerics.lmax)
             self.mie_coefficients[u_i, jmult, :] = t_entry(tau=tau, l=l,
-              kM = self.parameters.k_medium,
-              kS = self.parameters.omega * self.parameters.particles.unique_radius_index_pairs[u_i, 1],
-              R = np.real(self.parameters.particles.unique_radius_index_pairs[u_i, 0]))
+              k_medium = self.parameters.k_medium,
+              k_sphere = self.parameters.omega * self.parameters.particles.unique_radius_index_pairs[u_i, 1],
+              radius = np.real(self.parameters.particles.unique_radius_index_pairs[u_i, 0]))
 
   def compute_translation_table(self):
     jmax = Simulation.jmult_max(1, self.numerics.lmax)
     self.translation_ab5 = np.zeros((jmax, jmax, 2 * self.numerics.lmax + 1), dtype=np.complex)
+
+    wig.wig_table_init(3 * self.numerics.lmax, 3)
+    wig.wig_temp_init(3 * self.numerics.lmax)
 
     for tau1 in range(1,3):
       for l1 in range(1,self.numerics.lmax+1):
@@ -82,12 +84,15 @@ class Simulation:
                     self.translation_ab5[j1,j2,p] = np.power(1j, abs(m1 - m2) - abs(m1) - abs(m2) + l2 - l1 + p) * np.power(-1.0, m1-m2) * \
                       np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
                       (l1 * (l1 + 1) + l2 * (l2 + 1) - p * (p + 1)) * np.sqrt(2 * p + 1) * \
-                      wigner3j(l1, l2, p, m1, -m2, -m1+m2) * wigner3j(l1, l2, p, 0, 0, 0)
+                      wig.wig3jj(2 * l1, 2 * l2, 2 * p, 2 * m1, -2 * m2, 2 * (-m1+m2)) * wig.wig3jj(2 * l1, 2 * l2, 2 * p, 0, 0, 0)
                   elif p> 0:
                     self.translation_ab5[j1,j2,p] = np.power(1j, abs(m1 - m2) - abs(m1) - abs(m2) + l2 - l1 + p) * np.power(-1.0, m1-m2) * \
                       np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
                       np.lib.scimath.sqrt((l1 + l2 + 1 + p) * (l1 + l2 + 1 - p) * (p + l1 - l2) * (p - l1 + l2) * (2 * p + 1)) * \
-                      wigner3j(l1, l2, p, m1, -m2, -m1+m2) * wigner3j(l1, l2, p-1, 0, 0, 0)
+                      wig.wig3jj(2 * l1, 2 * l2, 2 * p, 2 * m1, -2 * m2, 2 * (-m1+m2)) * wig.wig3jj(2 * l1, 2 * l2, 2 * (p-1), 0, 0, 0)
+    
+    wig.wig_table_free()
+    wig.wig_temp_free()
 
   def compute_initial_field_coefficients(self):
     self.log.info('compute initial field coefficients ...')
