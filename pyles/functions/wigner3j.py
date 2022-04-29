@@ -1,22 +1,32 @@
+import logging
 import numpy as np
 from scipy.special import gammaln
 
-# def wigner3j(j123, m123):
 def wigner3j(j1, j2, j3, m1, m2, m3, verbose=False):
+  """
+  Calculates the Wigner 3j symbol for given j1, j2, j3, m1, m2, m3
+  Based on the work of https://de.mathworks.com/matlabcentral/fileexchange/5275-wigner3j-m
+
+  Faster approach: https://paperzz.com/doc/8141260/wigner-3j--6j-and-9j-symbols
+  """
+
+  log = logging.getLogger('wigner3j')
+
   # Input error checking
   if np.any(np.array([j1, j2, j3]) < 0):
-    print('The j must be non-negative')
+    log.error('The j must be non-negative')
     return None
   elif np.any(np.array([j1, j2, j3, m1, m2, m3]) % 0.5 != 0):
-    print('All arguments must be integers or half-integers')
+    log.error('All arguments must be integers or half-integers')
     return None
   elif np.any((np.array([j1, j2, j3]) - np.array([m1, m2, m3])) % 1 != 0):
-    print('[j1, j2, j3] and [m1, m2, m3] do not match')
+    log.error('[j1, j2, j3] and [m1, m2, m3] must to have the same pairwise parity')
     return None
 
   # Selection rules
   if (j3 > (j1 + j2)) or (j3 < np.abs(j1 - j2)) \
-    or (m1 + m2 + m3 != 0) or np.any(np.array([m1, m2, m3]) > np.array([j1, j2, j3])):
+    or (m1 + m2 + m3 != 0) \
+    or np.any(np.array(np.abs([m1, m2, m3])) > np.array([j1, j2, j3])):
     return 0
 
   # Simple common case
@@ -50,10 +60,5 @@ def wigner3j(j1, j2, j3, m1, m2, m3, verbose=False):
   
   return w
 
-
 if __name__ == '__main__':
-  from sympy.physics.wigner import wigner_3j as wigner_3j_sympy
-  w = wigner3j(8, 7, 4, -3, 2, 1)
-  print(w)
-  w_s= wigner_3j_sympy(8, 7, 4, -3, 2, 1)
-  print(w)
+  wigner3j(1,1,1,0,0,0)
