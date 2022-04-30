@@ -52,14 +52,14 @@ class Particles:
       axis=0)
 
   def compute_single_unique_idx(self):
-    # self.single_unique_idx = np.multiply(
-    #   np.sum(self.unique_single_radius_index_pairs, axis=1),
-    #   np.sum(self.unique_single_radius_index_pairs, axis=1) + 1
-    # ) // 2 + self.unique_single_radius_index_pairs[:,1]
+    self.single_unique_idx = (
+      np.sum(self.unique_single_radius_index_pairs, axis=1) * 
+      (np.sum(self.unique_single_radius_index_pairs, axis=1) + 1)
+    ) // 2 + self.unique_single_radius_index_pairs[:,1]
 
-    # pairedArray = np.multiply(
-    #   self.radius_array_idx + self.refractive_index_array_idx,
-    #   self.radius_array_idx + self.refractive_index_array_idx + 1
+    # pairedArray = (
+    #   self.radius_array_idx + self.refractive_index_array_idx * 
+    #   (self.radius_array_idx + self.refractive_index_array_idx + 1)
     # ) // 2 + self.refractive_index_array_idx
 
     # self.single_unique_idx, self.single_unique_array_idx = np.unique(
