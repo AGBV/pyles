@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/SoulEater45/pre-commit-python
-    rev: main
+    rev: 3f2faba330aebe53688b9c800edc2ba4483c661b
     hooks:
       - id: python_unittest
         alias: python_unittest_check
