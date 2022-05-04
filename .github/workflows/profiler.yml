@@ -34,7 +34,7 @@ jobs:
 
       - name: Generate Profile
         run: |
-          py-spy record --format speedscope --output profile.speedscope.json -- python3 main.py
+          py-spy record --nonblocking --format speedscope --output profile.speedscope.json -- python3 main.py
 
       - name: Commit documentation changes
         run: |
