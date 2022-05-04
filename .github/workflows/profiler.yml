@@ -5,6 +5,7 @@ on:
     paths:
       - "pyles/**"
       - "main.py"
+      - ".github/workflows/profiler.yml"
 
 jobs:
   docs:
