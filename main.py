@@ -3,7 +3,7 @@ import logging
 
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
+# import plotly.graph_objects as go
 # from functions.coupling_matrix_multiply import coupling_matrix_multiply
 
 from pyles.particles import Particles
