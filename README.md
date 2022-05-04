@@ -6,6 +6,12 @@ It is primarily developed so anyone could run it due to python being [FOSS](http
 
 Pyles will primarily be CPU-driven with a plan on utilizing [OpenCL](https://www.khronos.org/opencl/) down the road for more parallelization of the processes.
 
+## Performance
+The latest profiler result can be viewser [here](https://www.speedscope.app/#title=Pyles%20main.py%20profile&profileURL=https%3A%2F%2Fraw.githubusercontent.com%2FAGBV%2Fpyles%2Fgh-pages%2Fprofile.speedscope.json).
+On each commit to the `pyles` folder or the `main.py` file ([master](https://github.com/AGBV/pyles/tree/master) branch), the [py-spy](https://github.com/benfred/py-spy) profiler is run. The data is saved in the [gh-pages](https://github.com/AGBV/pyles/tree/gh-pages) branch and can be viewed using [speedscope](https://github.com/jlfwong/speedscope).
+
+
+
 # Code Improvements
 
 - Uses the indices provided by the numpy `unique` function (just like the matlab function) and bypasses the usage of a similar function to `dsearchn` in matlab. **Note**: Same improvement can be done in Matlab too!
