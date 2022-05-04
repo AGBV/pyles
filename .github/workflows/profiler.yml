@@ -39,7 +39,7 @@ jobs:
         run: |
           git clone https://github.com/agbv/pyles.git --branch gh-pages --single-branch gh-pages
           cp profile.speedscope.json gh-pages/
-          cd pyles-git
+          cd gh-pages
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add .
