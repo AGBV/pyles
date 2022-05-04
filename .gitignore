@@ -1,5 +1,8 @@
-# vscode
+# VSCode
 .vscode/
+
+# Ignore speedscope files
+*.speedscope.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

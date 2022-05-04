@@ -1,4 +1,5 @@
-numpy==1.21.5
-pandas==1.3.5
-scipy==1.8.0
-sympy==1.9
+numpy>=1.21.5
+pandas>=1.3.5
+scipy>=1.8.0
+sympy>=1.9
+pywigxjpf>=1.11
