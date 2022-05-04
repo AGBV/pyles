@@ -12,6 +12,8 @@ from pyles.parameters import Parameters
 from pyles.numerics import Numerics
 from pyles.simulation import Simulation
 
+from pyles.functions.misc import jmult_max
+
 logging.basicConfig(format='%(levelname)s (%(name)s): %(message)s', level=logging.INFO)
 
 spheres = pd.read_csv('data/sphere_parameters.csv', names = ['x', 'y', 'z', 'r', 'n', 'k'])
@@ -20,7 +22,7 @@ lmax = 4
 
 mie_coefficients = pd.read_csv('data/test/mie_coefficients.csv', header=None).applymap(lambda val: complex(val.replace('i', 'j'))).to_numpy()
 translation_ab5_csv = pd.read_csv('data/test/translation_ab5.csv', header=None, dtype=str).applymap(lambda val: complex(val.replace('i', 'j'))).to_numpy()
-translation_ab5 = np.zeros((Simulation.jmult_max(1, lmax), Simulation.jmult_max(1, lmax), 2*lmax+1), dtype=complex)
+translation_ab5 = np.zeros((jmult_max(1, lmax), jmult_max(1, lmax), 2*lmax+1), dtype=complex)
 for k in range(translation_ab5_csv.shape[0]):
   x = int(np.real(translation_ab5_csv[k, 0]))
   y = int(np.real(translation_ab5_csv[k, 1]))
@@ -50,8 +52,8 @@ simulation = Simulation(inputs, numerics)
 simulation.compute_mie_coefficients()
 simulation.compute_translation_table()
 
-simulation.compute_initial_field_coefficients()
-print(simulation.initial_field_coefficients)
+#simulation.compute_initial_field_coefficients()
+#print(simulation.initial_field_coefficients)
 
 # coupling_matrix_multiply()
 # fig = go.Figure()
