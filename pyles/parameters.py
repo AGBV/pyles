@@ -19,11 +19,11 @@ class Parameters:
 
   def __setup(self):
     self.__compute_omega()
-    self.__compute_Ks()
+    self.__compute_ks()
 
   def __compute_omega(self):
     self.omega = 2 * np.pi / self.wavelength
 
-  def __compute_Ks(self):
+  def __compute_ks(self):
     self.k_medium = self.omega * self.medium_mefractive_index
-    self.k_particle = self.omega * self.particles.m
+    self.k_particle = np.outer(self.particles.m, self.omega)

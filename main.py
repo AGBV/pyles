@@ -43,13 +43,16 @@ inputs = Parameters(wavelength=wavelength,
 numerics = Numerics(lmax=lmax,
                     polar_angles=np.arange(0, np.pi * (1 + 1/5e3), np.pi / 5e3),
                     azimuthal_angles=np.arange(0, np.pi * (2 + 1/1e2), np.pi / 1e2),
+                    particle_distance_resolution=1,
                     gpu=False)
 
 simulation = Simulation(inputs, numerics)
 simulation.compute_mie_coefficients()
 simulation.compute_translation_table()
 
-# simulation.compute_initial_field_coefficients()
+simulation.compute_initial_field_coefficients()
+print(simulation.initial_field_coefficients)
+
 # coupling_matrix_multiply()
 # fig = go.Figure()
 # fig.add_trace(go.Scatter3d(
