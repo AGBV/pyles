@@ -63,12 +63,12 @@ class TestSimulation(unittest.TestCase):
       simulation_h3_table_imag = np.imag(simulation.h3_table)
 
 
-      for k in range(h3_table.shape[0]):
-        for l in range(h3_table.shape[1]):
-          if not np.allclose(h3_table[k,l,0,:], simulation_h3_table_real[k,l,:], rtol=1e-3, atol=1e-5, equal_nan=True):
-            for m in range(h3_table.shape[3]):
-              if not np.allclose(h3_table[k,l,0,m], simulation_h3_table_real[k,l,m], rtol=1e-3, atol=1e-5, equal_nan=True):
-                print(k, simulation.size_param[l, m], simulation_h3_table_real[k,l,m], h3_table[k,l,0,m])
+      # for k in range(h3_table.shape[0]):
+      #   for l in range(h3_table.shape[1]):
+      #     if not np.allclose(h3_table[k,l,0,:], simulation_h3_table_real[k,l,:], rtol=1e-3, atol=1e-5, equal_nan=True):
+      #       for m in range(h3_table.shape[3]):
+      #         if not np.allclose(h3_table[k,l,0,m], simulation_h3_table_real[k,l,m], rtol=1e-3, atol=1e-5, equal_nan=True):
+      #           print(k, simulation.size_param[l, m], simulation_h3_table_real[k,l,m], h3_table[k,l,0,m])
 
 
       np.testing.assert_array_almost_equal(simulation.lookup_particle_distances, data['output']['simulation']['setup']['lookup_particle_distances'], 8, 'The lookup particles distances do not match.')
