@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 import pywigxjpf as wig
-from scipy.special import spherical_jn
+from scipy.special import spherical_jn, spherical_yn
 
 from pyles.parameters import Parameters
 from pyles.numerics import Numerics
@@ -36,8 +36,10 @@ class Simulation:
       dtype=complex)
 
     for p in range(2 * self.numerics.lmax + 1):
-      temp = spherical_jn(p, np.outer(self.lookup_particle_distances, self.parameters.k_medium))
-      self.h3_table[p, :, :] = temp * ~np.isnan(temp)
+      temp = \
+        spherical_jn(p, np.outer(self.lookup_particle_distances, self.parameters.k_medium)) + 1j * \
+        spherical_yn(p, np.outer(self.lookup_particle_distances, self.parameters.k_medium))
+      self.h3_table[p, :, :] = temp
 
   def __setup(self):
     self.__compute_lookup_particle_distances()

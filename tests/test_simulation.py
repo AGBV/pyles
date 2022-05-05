@@ -56,14 +56,13 @@ class TestSimulation(unittest.TestCase):
 
   #     simulation = Simulation(parameters, numerics)
 
-  #     h3_table = np.array(data['output']['setup']['h3_table'])
-  #     print(data['output']['setup']['h3_table'][0][0][0])
-  #     print(h3_table[0,0,0,:])
-  #     print(simulation.h3_table.shape)
-  #     print(h3_table[:,:,0,:].shape)
+  #     h3_table = np.array(data['output']['setup']['h3_table']).astype(float)
+
+  #     print(np.sum(np.isnan(np.real(simulation.h3_table))))
+  #     print(np.sum(np.isnan(np.real(h3_table[:,:,0,:]))))
 
   #     np.testing.assert_array_almost_equal(simulation.lookup_particle_distances, data['output']['setup']['lookup_particle_distances'], 5, 'The lookup particles distances do not match.')
-  #     np.testing.assert_array_almost_equal(np.real(simulation.h3_table), h3_table[:,:,0,:], 5, 'The h3 table does not match.')
+  #     np.testing.assert_array_almost_equal(np.real(simulation.h3_table[:,:,0]), h3_table[:,:,0,0], 2, 'The h3 table does not match.')
 
   # def test_initial_field_coefficients_planewave(self):
 
