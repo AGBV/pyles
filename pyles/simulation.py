@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-import pywigxjpf as wig
 from scipy.special import spherical_jn, spherical_yn
 from scipy.special import jv, yv
 
@@ -11,7 +10,6 @@ from pyles.functions.spherical_functions_trigon import spherical_functions_trigo
 from pyles.functions.t_entry import t_entry
 
 from pyles.functions.misc import transformation_coefficients
-from pyles.functions.misc import jmult_max
 from pyles.functions.misc import multi2single_index
 
 class Simulation:
@@ -35,12 +33,10 @@ class Simulation:
     self.h3_table = np.zeros(
       (2 * self.numerics.lmax + 1, self.lookup_particle_distances.shape[0], self.parameters.medium_mefractive_index.shape[0]), 
       dtype=complex)
-    self.size_param = np.outer(self.lookup_particle_distances, self.parameters.k_medium)
+    size_param = np.outer(self.lookup_particle_distances, self.parameters.k_medium)
 
     for p in range(2 * self.numerics.lmax + 1):
-      self.h3_table[p, :, :] = \
-        spherical_jn(p, self.size_param) + 1j * \
-        spherical_yn(p, self.size_param)
+      self.h3_table[p, :, :] = spherical_jn(p, size_param) + 1j * spherical_yn(p, size_param)
 
   def __setup(self):
     self.__compute_lookup_particle_distances()
@@ -63,36 +59,6 @@ class Simulation:
               k_sphere = self.parameters.omega * self.parameters.particles.unique_radius_index_pairs[u_i, 1],
               radius = np.real(self.parameters.particles.unique_radius_index_pairs[u_i, 0]))
 
-  def compute_translation_table(self):
-    jmax = jmult_max(1, self.numerics.lmax)
-    self.translation_ab5 = np.zeros((jmax, jmax, 2 * self.numerics.lmax + 1), dtype=np.complex)
-
-    wig.wig_table_init(3 * self.numerics.lmax, 3)
-    wig.wig_temp_init(3 * self.numerics.lmax)
-
-    for tau1 in range(1,3):
-      for l1 in range(1,self.numerics.lmax+1):
-        for m1 in range(-l1, l1+1):
-          j1 = multi2single_index(0, tau1, l1, m1, self.numerics.lmax)
-          for tau2 in range(1, 3):
-            for l2 in range(1, self.numerics.lmax+1):
-              for m2 in range(-l2, l2+1):
-                j2 = multi2single_index(0, tau2, l2, m2, self.numerics.lmax)
-                for p in range(0, 2*self.numerics.lmax+1):
-                  if tau1 == tau2:
-                    self.translation_ab5[j1,j2,p] = np.power(1j, abs(m1 - m2) - abs(m1) - abs(m2) + l2 - l1 + p) * np.power(-1.0, m1-m2) * \
-                      np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
-                      (l1 * (l1 + 1) + l2 * (l2 + 1) - p * (p + 1)) * np.sqrt(2 * p + 1) * \
-                      wig.wig3jj(2 * l1, 2 * l2, 2 * p, 2 * m1, -2 * m2, 2 * (-m1+m2)) * wig.wig3jj(2 * l1, 2 * l2, 2 * p, 0, 0, 0)
-                  elif p> 0:
-                    self.translation_ab5[j1,j2,p] = np.power(1j, abs(m1 - m2) - abs(m1) - abs(m2) + l2 - l1 + p) * np.power(-1.0, m1-m2) * \
-                      np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
-                      np.lib.scimath.sqrt((l1 + l2 + 1 + p) * (l1 + l2 + 1 - p) * (p + l1 - l2) * (p - l1 + l2) * (2 * p + 1)) * \
-                      wig.wig3jj(2 * l1, 2 * l2, 2 * p, 2 * m1, -2 * m2, 2 * (-m1+m2)) * wig.wig3jj(2 * l1, 2 * l2, 2 * (p-1), 0, 0, 0)
-    
-    wig.wig_table_free()
-    wig.wig_temp_free()
-
   def compute_initial_field_coefficients(self):
     self.log.info('compute initial field coefficients ...')
     
@@ -105,14 +71,14 @@ class Simulation:
         self.log.error('  this case is not implemented')
     else:
       self.log.info('  plane wave ...')
-      self.initial_field_coefficients = self.initial_field_coefficients_planewave()
+      self.__compute_initial_field_coefficients_planewave()
     
     self.log.info('done')
 
   def compute_right_hand_side(self):
     self.right_hand_side = self.mie_coefficients[self.parameters.particles.single_unique_array_idx, :] * self.initial_field_coefficients
 
-  def initial_field_coefficients_planewave(self):
+  def __compute_initial_field_coefficients_planewave(self):
     lmax = self.numerics.lmax
     E0 = self.parameters.initial_field.amplitude
     k = self.parameters.k_medium
@@ -127,24 +93,19 @@ class Simulation:
 
     # cylindrical coordinates for relative particle positions
     relative_particle_positions = self.parameters.particles.pos - self.parameters.initial_field.focal_point
-    kvec = k * np.array((sb * np.cos(alpha), sb * np.sin(alpha), cb))
+    kvec = np.outer(np.array((sb * np.cos(alpha), sb * np.sin(alpha), cb)), k)
     eikr = np.exp(1j * np.matmul(relative_particle_positions, kvec))
 
     # clean up some memory?
     del (k, beta, cb, sb, kvec, relative_particle_positions)
 
-    a_i = np.zeros((self.parameters.particles.number, self.numerics.nmax))
+    self.initial_field_coefficients = np.zeros((self.parameters.particles.number, self.numerics.nmax, self.parameters.k_medium.shape[0]), dtype=complex)
     for m in range(-lmax, lmax+1):
       for tau in range(1, 3):
-        for l in range(1, np.abs(m)+1):
+        for l in range(np.max([1, np.abs(m)]), lmax+1):
           n = multi2single_index(0, tau, l, m, lmax)
-          print(4 * E0)
-          print(np.exp(-1j * m * alpha))
-          print(eikr.shape)
-          print(transformation_coefficients(pilm, taulm, tau, l, m, self.parameters.initial_field.pol, dagger=True))
-          a_i[:,n] = 4 * E0 * np.exp(-1j * m * alpha) * eikr * transformation_coefficients(pilm, taulm, tau, l, m, self.parameters.initial_field.pol, dagger=True)
+          self.initial_field_coefficients[:,n,:] = 4 * E0 * np.exp(-1j * m * alpha) * eikr * transformation_coefficients(pilm, taulm, tau, l, m, self.parameters.initial_field.pol, dagger=True)
 
-    return a_i
 
 
 # function aI = initial_field_coefficients_planewave(simulation)

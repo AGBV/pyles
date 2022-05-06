@@ -15,7 +15,7 @@ On each commit to the `pyles` folder or the `main.py` file ([master](https://git
 # Code Improvements
 
 - Uses the indices provided by the numpy `unique` function (just like the matlab function) and bypasses the usage of a similar function to `dsearchn` in matlab. **Note**: Same improvement can be done in Matlab too!
-- The provided function for the Wigner 3j symbold `wigner3j` is not numerically stable for large values of `j` (upper row). As an alterntive the `pywigxjpf` package is used which is a python wrapper for the [wigxjpf](http://fy.chalmers.se/subatom/wigxjpf/) C++ framework. Due to some mathematical *tricks*, a speedup is enabled which also results in running more stable than the [Matlab alternative](https://de.mathworks.com/matlabcentral/fileexchange/5275-wigner3j-m).
+- The provided function for the Wigner 3j symbold `wigner3j` is not numerically stable for large values of `j` (upper row). As an alterntive the `pywigxjpf` package is used which is a python wrapper for the [wigxjpf](http://fy.chalmers.se/subatom/wigxjpf/) C++ framework. Due to some mathematical *tricks*, a [speedup](https://paperzz.com/doc/8141260/wigner-3j--6j-and-9j-symbols) is enabled which also results in running more stable than the [Matlab alternative](https://de.mathworks.com/matlabcentral/fileexchange/5275-wigner3j-m).
 
 # Devlopment
 Before a commit can be executed, the `pre-commit` hook will be triggered. This will run all tests, and only then will a commit be approved! 

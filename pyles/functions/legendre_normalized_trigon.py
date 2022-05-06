@@ -66,11 +66,3 @@ def legendre_normalized_trigon(x, y=None, lmax=4):
     plm = np.reshape(plm, np.concatenate(([lmax+1, lmax+1], size)))    
 
   return plm
-
-# Testing
-if __name__ == '__main__':
-  import sympy as sym
-  x = sym.Symbol('x')
-  # x = np.pi / 4
-  plm = legendre_normalized_trigon(x)
-  sym.pprint(plm)

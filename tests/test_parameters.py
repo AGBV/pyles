@@ -48,9 +48,9 @@ class TestParameters(unittest.TestCase):
       test_k_medium = np.array(data['output']['parameters']['setup']['k_medium']).astype(complex)
       test_k_particle = np.array(data['output']['parameters']['setup']['k_particle'])
 
-      np.testing.assert_array_almost_equal(parameters.omega, test_omega, 6, 'The omega does not match.')
-      np.testing.assert_array_almost_equal(parameters.k_medium, test_k_medium, 6, 'The wavenumber of the medium does not match.')
-      np.testing.assert_array_almost_equal(parameters.k_particle, test_k_particle, 6, 'The wavenumber of the particles do not match.')
+      np.testing.assert_array_almost_equal(parameters.omega, test_omega, 10, 'The omega does not match.')
+      np.testing.assert_array_almost_equal(parameters.k_medium, test_k_medium, 10, 'The wavenumber of the medium does not match.')
+      np.testing.assert_array_almost_equal(parameters.k_particle, test_k_particle, 10, 'The wavenumber of the particles do not match.')
 
 
 if __name__ == '__main__':

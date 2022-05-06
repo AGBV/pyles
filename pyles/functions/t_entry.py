@@ -1,3 +1,5 @@
+import logging
+
 from scipy.special import spherical_jn, spherical_yn
 
 def t_entry(tau, l, k_medium, k_sphere, radius, field_type = 'scattered'):
@@ -32,5 +34,6 @@ def t_entry(tau, l, k_medium, k_sphere, radius, field_type = 'scattered'):
     case ('internal', 2):
       return (m * jx * dhx - m * hx * djx) / (m**2 * jmx * dhx - hx * djmx); # d
     case _:
-      print('Not a valid field type provided. Returning None!')
+      log = logging.getLogger('t_entry')
+      log.warning('Not a valid field type provided. Returning None!')
       return None
