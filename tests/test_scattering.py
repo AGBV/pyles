@@ -8,12 +8,23 @@ sys.path.append(str(Path(__file__).parents[1]))
 import numpy as np
 import pandas as pd
 
-from pyles.functions.t_entry import t_entry
 from pyles.functions.misc import multi2single_index
+from pyles.functions.t_entry import t_entry
+from pyles.functions.coupling_matrix_multiply import coupling_matrix_multiply
+
+from pyles.particles import Particles
+from pyles.initial_field import InitialField
+from pyles.parameters import Parameters
+from pyles.numerics import Numerics
+from pyles.simulation import Simulation
 
 class TestScattering(unittest.TestCase):
 
   def test_t_entry_single_wavelength(self):
+    # TODO
+    # Generate new data with json
+    # Use allclose to assert floating
+    # Assert if the for loop hasn't been accessed at least ones !
     p = re.compile(r'mie_coefficients_lmax_(\d+)_wavelength_(\d+\.?\d*)_medium_(-?\d+\.?\d*)_(-?\d+\.?\d*)\.csv')
     for data_file in glob.glob('tests/data/mie_coefficients_lmax*.csv'):
 
@@ -49,6 +60,10 @@ class TestScattering(unittest.TestCase):
       np.testing.assert_array_almost_equal(mie,  mie_test,  decimal=5, err_msg='Mie coefficients do not match in %s' % (data_file), verbose=True)
 
   def test_t_entry_multiple_wavelength(self):
+    # TODO
+    # Generate new data with json
+    # Use allclose to assert floating
+    # Assert if the for loop hasn't been accessed at least ones !
     p = re.compile(r'mie_coefficients_.+_lmax_(\d+)_(.+)\.csv')
     for data_file in glob.glob('tests/data/mie_coefficients_*_lmax*.csv'):
       
@@ -84,6 +99,59 @@ class TestScattering(unittest.TestCase):
                 radius = radii[u_i])
 
       np.testing.assert_array_almost_equal(mie,  mie_test,  decimal=5, err_msg='Mie coefficients do not match in %s' % (data_file), verbose=True)
+      #np.testing.assert_allclose(mie,  mie_test,  1e-2, 0, True, 'Mie coefficients do not match in %s' % (data_file))
+
+  def test_coupling_matrix(self):
+    executions = 0
+    module = 'scatter'
+    relative_precision = 1e-8
+    p = re.compile(module + r'_(.+)(\.big)?\.json')
+    for data_file in glob.glob('tests/data/%s_*.json' % module):
+
+      # res = p.search(data_file)
+      # identifier = res.group(1)
+      # print(identifier)
+
+      data = pd.read_json(data_file)
+      lmax = data['input']['lmax']
+      spheres = np.array(data['input']['particles'])
+      wavelength = np.array(data['input']['wavelength'])
+      medium_ref_idx = np.array([complex(x.replace('i', 'j')) for x in data['input']['medium_ref_idx']])
+
+      polar_angle = data['input']['polar_angle']
+      azimuthal_angle = data['input']['azimuthal_angle']
+      polar_angles = np.array(data['input']['polar_angles'])
+      azimuthal_angles = np.array(data['input']['azimuthal_angles'])
+
+      particles = Particles(spheres[:,0:3], spheres[:,3], spheres[:,4:])
+      initial_field = InitialField(beam_width=0,
+                             focal_point=np.array((0,0,0)),
+                             polar_angle=polar_angle,
+                             azimuthal_angle=azimuthal_angle,
+                             polarization='TE')
+      parameters = Parameters(wavelength=wavelength,
+                    medium_mefractive_index=medium_ref_idx,
+                    particles=particles,
+                    initial_field=initial_field)
+
+      numerics = Numerics(lmax=lmax,
+                    polar_angles=polar_angles,
+                    azimuthal_angles=azimuthal_angles,
+                    gpu=False,
+                    particle_distance_resolution = 1)
+
+      simulation = Simulation(parameters, numerics)
+
+      numerics.compute_translation_table()
+      simulation.compute_mie_coefficients()
+      simulation.compute_initial_field_coefficients()
+
+      coupling_matrix_multiply(simulation, data['output']['scattering']['coupling'][0]['value'])
+
+      # for coupling in data['output']['scattering']['coupling']:
+      #   value = coupling['value']
+      #   Wx = coupling_matrix_multiply(simulation, value)
+
 
 if __name__ == '__main__':
   unittest.main()

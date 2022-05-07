@@ -65,8 +65,7 @@ class Simulation:
     if np.isfinite(self.parameters.initial_field.beam_width) and (self.parameters.initial_field.beam_width > 0):
       self.log.info('  Gaussian beam ...')
       if self.parameters.initial_field.normal_incidence:
-        pass
-        # self.initial_field_coefficients = initial_field_coefficients_wavebundle_normal_incidence(self)
+        self.__compute_initial_field_coefficients_wavebundle_normal_incidence()
       else:
         self.log.error('  this case is not implemented')
     else:
@@ -106,37 +105,7 @@ class Simulation:
           n = multi2single_index(0, tau, l, m, lmax)
           self.initial_field_coefficients[:,n,:] = 4 * E0 * np.exp(-1j * m * alpha) * eikr * transformation_coefficients(pilm, taulm, tau, l, m, self.parameters.initial_field.pol, dagger=True)
 
-
-
-# function aI = initial_field_coefficients_planewave(simulation)
-
-# lmax = simulation.numerics.lmax;
-# E0 = simulation.input.initialField.amplitude;
-# k = simulation.input.k_medium;
-
-# beta = simulation.input.initialField.polarAngle;
-# cb = cos(beta);
-# sb = sin(beta);
-# alpha = simulation.input.initialField.azimuthalAngle;
-
-# % pi and tau symbols for transformation matrix B_dagger
-# [pilm,taulm] = spherical_functions_trigon(cb,sb,lmax);  % Nk x 1
-
-# % cylindrical coordinates for relative particle positions
-# relativeParticlePositions = simulation.input.particles.positionArray - simulation.input.initialField.focalPoint;
-# kvec = k*[sb*cos(alpha);sb*sin(alpha);cb];
-# eikr = exp(1i*relativeParticlePositions*kvec);
-
-# clear k beta cb sb kvec relativeParticlePositions % clean up some memory?
-
-# % compute initial field coefficients
-# aI = simulation.numerics.deviceArray(zeros(simulation.input.particles.number,simulation.numerics.nmax,'single'));
-# for m=-lmax:lmax
-#     for tau=1:2
-#         for l=max(1,abs(m)):lmax
-#             n=multi2single_index(1,tau,l,m,lmax);
-#             aI(:,n) = 4 * E0 * exp(-1i*m*alpha) .* eikr .* transformation_coefficients(pilm,taulm,tau,l,m,simulation.input.initialField.pol,'dagger');
-#         end
-#     end
-# end
-# end
+  def __compute_initial_field_coefficients_wavebundle_normal_incidence(self):
+    # TODO
+    # https://github.com/disordered-photonics/celes/blob/master/src/initial/initial_field_coefficients_wavebundle_normal_incidence.m
+    self.initial_field_coefficients = None
