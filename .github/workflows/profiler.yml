@@ -1,3 +1,5 @@
+name: create profiler report
+
 on:
   push:
     branches:
