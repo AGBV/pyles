@@ -66,6 +66,7 @@ class TestSimulation(unittest.TestCase):
       
 
   def test_initial_field_coefficients_planewave(self):
+    executions = 0
     module = 'test'
     relative_precision = 1e-8
     p = re.compile(module + r'_(.+)(\.big)?\.json')
@@ -109,6 +110,9 @@ class TestSimulation(unittest.TestCase):
       initial_field_coefficients_test = np.array(data['output']['simulation']['initial_field_coefficients'], dtype=complex)
 
       np.testing.assert_allclose(simulation.initial_field_coefficients, initial_field_coefficients_test, relative_precision, 0, True, 'The initial field coefficients do not match.')
+      executions += 1
+
+    self.assertGreater(executions, 0, 'No test data provided to be run.')
 
 
 if __name__ == '__main__':
