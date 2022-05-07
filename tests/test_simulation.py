@@ -109,7 +109,6 @@ class TestSimulation(unittest.TestCase):
       initial_field_coefficients_test = np.array(data['output']['simulation']['initial_field_coefficients'], dtype=complex)
 
       np.testing.assert_allclose(simulation.initial_field_coefficients, initial_field_coefficients_test, relative_precision, 0, True, 'The initial field coefficients do not match.')
-      # np.testing.assert_array_equal(particles.refractive_index_array_idx, refractive_index_array_idx, 'Refractive index array indices do not match.')
 
 
 if __name__ == '__main__':
