@@ -4,6 +4,9 @@
 # Ignore speedscope files
 *.speedscope.json
 
+# Ignore build files from cython
+cython/*.c
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
