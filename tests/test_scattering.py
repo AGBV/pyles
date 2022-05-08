@@ -101,56 +101,56 @@ class TestScattering(unittest.TestCase):
       np.testing.assert_array_almost_equal(mie,  mie_test,  decimal=5, err_msg='Mie coefficients do not match in %s' % (data_file), verbose=True)
       #np.testing.assert_allclose(mie,  mie_test,  1e-2, 0, True, 'Mie coefficients do not match in %s' % (data_file))
 
-  def test_coupling_matrix(self):
-    executions = 0
-    module = 'scatter'
-    relative_precision = 1e-8
-    p = re.compile(module + r'_(.+)(\.big)?\.json')
-    for data_file in glob.glob('tests/data/%s_*.json' % module):
+  # def test_coupling_matrix(self):
+  #   executions = 0
+  #   module = 'scatter'
+  #   relative_precision = 1e-8
+  #   p = re.compile(module + r'_(.+)(\.big)?\.json')
+  #   for data_file in glob.glob('tests/data/%s_*.json' % module):
 
-      # res = p.search(data_file)
-      # identifier = res.group(1)
-      # print(identifier)
+  #     # res = p.search(data_file)
+  #     # identifier = res.group(1)
+  #     # print(identifier)
 
-      data = pd.read_json(data_file)
-      lmax = data['input']['lmax']
-      spheres = np.array(data['input']['particles'])
-      wavelength = np.array(data['input']['wavelength'])
-      medium_ref_idx = np.array([complex(x.replace('i', 'j')) for x in data['input']['medium_ref_idx']])
+  #     data = pd.read_json(data_file)
+  #     lmax = data['input']['lmax']
+  #     spheres = np.array(data['input']['particles'])
+  #     wavelength = np.array(data['input']['wavelength'])
+  #     medium_ref_idx = np.array([complex(x.replace('i', 'j')) for x in data['input']['medium_ref_idx']])
 
-      polar_angle = data['input']['polar_angle']
-      azimuthal_angle = data['input']['azimuthal_angle']
-      polar_angles = np.array(data['input']['polar_angles'])
-      azimuthal_angles = np.array(data['input']['azimuthal_angles'])
+  #     polar_angle = data['input']['polar_angle']
+  #     azimuthal_angle = data['input']['azimuthal_angle']
+  #     polar_angles = np.array(data['input']['polar_angles'])
+  #     azimuthal_angles = np.array(data['input']['azimuthal_angles'])
 
-      particles = Particles(spheres[:,0:3], spheres[:,3], spheres[:,4:])
-      initial_field = InitialField(beam_width=0,
-                             focal_point=np.array((0,0,0)),
-                             polar_angle=polar_angle,
-                             azimuthal_angle=azimuthal_angle,
-                             polarization='TE')
-      parameters = Parameters(wavelength=wavelength,
-                    medium_mefractive_index=medium_ref_idx,
-                    particles=particles,
-                    initial_field=initial_field)
+  #     particles = Particles(spheres[:,0:3], spheres[:,3], spheres[:,4:])
+  #     initial_field = InitialField(beam_width=0,
+  #                            focal_point=np.array((0,0,0)),
+  #                            polar_angle=polar_angle,
+  #                            azimuthal_angle=azimuthal_angle,
+  #                            polarization='TE')
+  #     parameters = Parameters(wavelength=wavelength,
+  #                   medium_mefractive_index=medium_ref_idx,
+  #                   particles=particles,
+  #                   initial_field=initial_field)
 
-      numerics = Numerics(lmax=lmax,
-                    polar_angles=polar_angles,
-                    azimuthal_angles=azimuthal_angles,
-                    gpu=False,
-                    particle_distance_resolution = 1)
+  #     numerics = Numerics(lmax=lmax,
+  #                   polar_angles=polar_angles,
+  #                   azimuthal_angles=azimuthal_angles,
+  #                   gpu=False,
+  #                   particle_distance_resolution = 1)
 
-      simulation = Simulation(parameters, numerics)
+  #     simulation = Simulation(parameters, numerics)
 
-      numerics.compute_translation_table()
-      simulation.compute_mie_coefficients()
-      simulation.compute_initial_field_coefficients()
+  #     numerics.compute_translation_table()
+  #     simulation.compute_mie_coefficients()
+  #     simulation.compute_initial_field_coefficients()
 
-      coupling_matrix_multiply(simulation, data['output']['scattering']['coupling'][0]['value'])
+  #     coupling_matrix_multiply(simulation, data['output']['scattering']['coupling'][0]['value'])
 
-      # for coupling in data['output']['scattering']['coupling']:
-      #   value = coupling['value']
-      #   Wx = coupling_matrix_multiply(simulation, value)
+  #     # for coupling in data['output']['scattering']['coupling']:
+  #     #   value = coupling['value']
+  #     #   Wx = coupling_matrix_multiply(simulation, value)
 
 
 if __name__ == '__main__':
