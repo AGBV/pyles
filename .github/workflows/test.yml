@@ -8,6 +8,7 @@ on:
       - "pyles/**"
       - "tests/**"
       - ".github/workflows/test.yml"
+      - "sonar-project.properties"
 
 jobs:
   coverage:
