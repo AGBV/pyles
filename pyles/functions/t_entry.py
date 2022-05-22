@@ -24,16 +24,29 @@ def t_entry(tau, l, k_medium, k_sphere, radius, field_type = 'scattered'):
   djmx = mx * spherical_jn(l-1, mx) - l * jmx
   dhx  = x * (spherical_jn(l-1, x) + 1j * spherical_yn(l-1, x)) - l * hx
 
-  match (field_type, tau):
-    case ('scattered', 1):
+  if (field_type, tau) == ('scattered', 1):
       return -(jmx * djx - jx * djmx) / (jmx * dhx - hx * djmx) # -b
-    case ('scattered', 2):
+  elif (field_type, tau) ==  ('scattered', 2):
       return -(m**2 * jmx * djx - jx * djmx) / (m**2 * jmx * dhx - hx * djmx) # -a
-    case ('internal', 1):
+  elif (field_type, tau) == ('internal', 1):
       return (jx * dhx - hx * djx) / (jmx * dhx - hx * djmx); # c
-    case ('internal', 2):
+  elif (field_type, tau) == ('internal', 2):
       return (m * jx * dhx - m * hx * djx) / (m**2 * jmx * dhx - hx * djmx); # d
-    case _:
+  else:
       log = logging.getLogger('t_entry')
       log.warning('Not a valid field type provided. Returning None!')
       return None
+
+  # match (field_type, tau):
+  #   case ('scattered', 1):
+  #     return -(jmx * djx - jx * djmx) / (jmx * dhx - hx * djmx) # -b
+  #   case ('scattered', 2):
+  #     return -(m**2 * jmx * djx - jx * djmx) / (m**2 * jmx * dhx - hx * djmx) # -a
+  #   case ('internal', 1):
+  #     return (jx * dhx - hx * djx) / (jmx * dhx - hx * djmx); # c
+  #   case ('internal', 2):
+  #     return (m * jx * dhx - m * hx * djx) / (m**2 * jmx * dhx - hx * djmx); # d
+  #   case _:
+  #     log = logging.getLogger('t_entry')
+  #     log.warning('Not a valid field type provided. Returning None!')
+  #     return None

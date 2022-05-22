@@ -23,9 +23,6 @@ class Numerics:
     
     self.log = logging.getLogger(__name__)
 
-    if gpu != False:
-      self.log.warning('GPU functionality isn\'t implemented yet!\nReverting to CPU.')
-
     self.__setup()
 
   def __compute_nmax(self):
@@ -49,9 +46,14 @@ class Numerics:
 
   def __setup(self):
     self.__compute_nmax()
+    self.compute_translation_table()
     # self.__plm_coefficients()
 
+  def compute_plm_coefficients(self):
+    self.__plm_coefficients()
+
   def compute_translation_table(self):
+    self.log.info('Computing the translation table')
     jmax = jmult_max(1, self.lmax)
     self.translation_ab5 = np.zeros((jmax, jmax, 2 * self.lmax + 1), dtype=complex)
 
@@ -72,7 +74,7 @@ class Numerics:
                       np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
                       (l1 * (l1 + 1) + l2 * (l2 + 1) - p * (p + 1)) * np.sqrt(2 * p + 1) * \
                       wig.wig3jj(2 * l1, 2 * l2, 2 * p, 2 * m1, -2 * m2, 2 * (-m1+m2)) * wig.wig3jj(2 * l1, 2 * l2, 2 * p, 0, 0, 0)
-                  elif p> 0:
+                  elif p > 0:
                     self.translation_ab5[j1,j2,p] = np.power(1j, abs(m1 - m2) - abs(m1) - abs(m2) + l2 - l1 + p) * np.power(-1.0, m1-m2) * \
                       np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
                       np.lib.scimath.sqrt((l1 + l2 + 1 + p) * (l1 + l2 + 1 - p) * (p + l1 - l2) * (p - l1 + l2) * (2 * p + 1)) * \

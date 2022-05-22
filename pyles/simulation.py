@@ -1,8 +1,11 @@
 import logging
+from time import time
 
 import numpy as np
+from scipy.spatial.distance import pdist, squareform
 from scipy.special import spherical_jn, spherical_yn
-from scipy.special import jv, yv
+from scipy.special import hankel1
+from scipy.special import lpmv
 
 from pyles.parameters import Parameters
 from pyles.numerics import Numerics
@@ -19,17 +22,17 @@ class Simulation:
     self.parameters = parameters
     self.numerics = numerics
 
-    self.__setup()
     self.log = logging.getLogger(__name__)
+    self.__setup()
   
-  def __compute_lookup_particle_distances(self):
+  def legacy_compute_lookup_particle_distances(self):
     # add two zeros at beginning to allow interpolation
     # also in the first segment
     step = self.numerics.particle_distance_resolution
     maxdist = self.parameters.particles.max_particle_distance + 3 * self.numerics.particle_distance_resolution
     self.lookup_particle_distances = np.concatenate((np.array([0]), np.arange(0, maxdist + np.finfo(float).eps, step)))
 
-  def __compute_h3_table(self):
+  def legacy_compute_h3_table(self):
     self.h3_table = np.zeros(
       (2 * self.numerics.lmax + 1, self.lookup_particle_distances.shape[0], self.parameters.medium_mefractive_index.shape[0]), 
       dtype=complex)
@@ -37,10 +40,45 @@ class Simulation:
 
     for p in range(2 * self.numerics.lmax + 1):
       self.h3_table[p, :, :] = spherical_jn(p, size_param) + 1j * spherical_yn(p, size_param)
+      # self.h3_table[p, :, :] = np.sqrt(np.pi / size_param) * 2 /hankel1(p, size_param)
+
+  def __compute_lookups(self):
+    lookup_computation_time_start = time()
+    lmax = self.numerics.lmax
+    particle_number = self.parameters.particles.number
+
+    dists = squareform(pdist(self.parameters.particles.pos))
+    ct = np.divide(
+      np.subtract.outer(self.parameters.particles.pos[:,2], self.parameters.particles.pos[:,2]),
+      dists,
+      out=np.zeros((particle_number, particle_number)),
+      where=dists != 0)
+    phi = np.arctan2(
+      np.subtract.outer(self.parameters.particles.pos[:,1], self.parameters.particles.pos[:,1]),
+      np.subtract.outer(self.parameters.particles.pos[:,0], self.parameters.particles.pos[:,0]))
+
+    size_param = np.outer(dists.ravel(), self.parameters.k_medium).reshape([particle_number, particle_number, self.parameters.k_medium.shape[0]])
+
+    self.sph_h = np.zeros((2 * lmax + 1, particle_number, particle_number, self.parameters.k_medium.shape[0]), dtype=complex)
+    self.e_j_dm_phi = np.zeros((4 * lmax + 1, particle_number, particle_number), dtype=complex)
+    self.plm = np.zeros(((lmax + 1) * (2 * lmax + 1), particle_number, particle_number))
+
+    for p in range(2 * lmax + 1):
+      # self.sph_h[p, :, :, :] = spherical_jn(p, size_param) + 1j * spherical_yn(p, size_param)
+      self.sph_h[p, :, :] = np.sqrt(np.divide(np.pi / 2, size_param, out=np.zeros_like(size_param), where=size_param != 0)) * hankel1(p + 1/2, size_param)
+      self.e_j_dm_phi[p, :, :]            = np.exp(1j * (p - 2 * lmax) * phi)
+      self.e_j_dm_phi[p + 2 * lmax, :, :] = np.exp(1j * p * phi)
+      for absdm in range(p + 1):
+        cml = np.sqrt((2 * p + 1) / 2 / np.prod(np.arange(p - absdm + 1, p + absdm + 1)))
+        self.plm[p * (p + 1) // 2 + absdm, :, :] = cml * np.power(-1.0, absdm) * lpmv(absdm, p, ct)
+    
+    lookup_computation_time_stop = time()
+    self.log.info('Computing lookup tables took %f s' % (lookup_computation_time_stop - lookup_computation_time_start))
 
   def __setup(self):
-    self.__compute_lookup_particle_distances()
-    self.__compute_h3_table()
+    # self.__compute_lookup_particle_distances()
+    # self.__compute_h3_table()
+    self.__compute_lookups()
 
   def compute_mie_coefficients(self):
     self.mie_coefficients = np.zeros(

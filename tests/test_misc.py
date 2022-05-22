@@ -17,7 +17,7 @@ class TestSimulation(unittest.TestCase):
     num_part_array = [10, 50, 100, 500]
     for lmax in lmax_array:
       for num_part in num_part_array:
-        self.assertEquals(jmult_max(num_part, lmax), 2 * num_part * lmax * (lmax + 2), 'The number of indices for the configuration num_part=%d and lmax=%d is not mathing.' % (num_part, lmax))
+        self.assertEqual(jmult_max(num_part, lmax), 2 * num_part * lmax * (lmax + 2), 'The number of indices for the configuration num_part=%d and lmax=%d is not mathing.' % (num_part, lmax))
 
   def test_indexing(self):
     lmax_array = [2, 4, 9]
@@ -31,10 +31,10 @@ class TestSimulation(unittest.TestCase):
                 idx = multi2single_index(j_s, tau, l, m, lmax)
                 j_s_calc, tau_calc, l_calc, m_calc = single_index2multi(idx, lmax)
                 
-                self.assertEquals(j_s, j_s_calc, 'The particle index does not match')
-                self.assertEquals(tau, tau_calc, 'The polarization does not match')
-                self.assertEquals(l, l_calc, 'The degree does not match')
-                self.assertEquals(m, m_calc, 'The order does not match')      
+                self.assertEqual(j_s, j_s_calc, 'The particle index does not match')
+                self.assertEqual(tau, tau_calc, 'The polarization does not match')
+                self.assertEqual(l, l_calc, 'The degree does not match')
+                self.assertEqual(m, m_calc, 'The order does not match')      
 
 if __name__ == '__main__':
   unittest.main()

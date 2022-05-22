@@ -17,18 +17,25 @@ class InitialField:
     self.beam_width       = beam_width
     self.focal_point      = focal_point
 
-    self.__setup()
     self.log = logging.getLogger(__name__)
+    self.__setup()
 
   def __set_pol_idx(self):
-    match self.polarization.lower():
-      case 'te':
-        self.pol = 1
-      case 'tm':
-        self.pol = 2
-      case _:
-        self.pol = 1
-        self.log.warning('{} is not a valid polarization type. Please use TE or TM. Reverting to TE'.format(self.polarization))
+    if self.polarization.lower() == 'te':
+      self.pol = 1
+    elif self.polarization.lower() == 'tm':
+      self.pol = 2
+    else:
+      self.pol = 1
+      self.log.warning('{} is not a valid polarization type. Please use TE or TM. Reverting to TE'.format(self.polarization))
+    # match self.polarization.lower():
+    #   case 'te':
+    #     self.pol = 1
+    #   case 'tm':
+    #     self.pol = 2
+    #   case _:
+    #     self.pol = 1
+    #     self.log.warning('{} is not a valid polarization type. Please use TE or TM. Reverting to TE'.format(self.polarization))
 
   def __set_normal_incidence(self):
     self.normal_incidence = np.abs(np.sin(self.polar_angle)) < 1e-5;
