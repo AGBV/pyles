@@ -4,8 +4,9 @@
 # Ignore speedscope files
 *.speedscope.json
 
-# Ignore build files from cython
-cython/*.c
+# Ignore json test data for now (big ones)
+# tests/data/scatter_sphere_parameters.json
+tests/data/simulation/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

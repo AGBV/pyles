@@ -1,10 +1,11 @@
 # Pyles
 
 Pyles (**Py**thon Ce**les**) is a python implementation of the [CELES](https://github.com/disordered-photonics/celes) framework developed by Egel A, Pattelli L, Mazzamuto G, Wiersma DS, and Lemmer U.
+It is primarily developed so anyone could run it due to python being [FOSS](https://en.wikipedia.org/wiki/Free_and_open-source_software), while MATLAB, on which CELES is implemented, is not.
 
-It is primarily developed so anyone could run it due to python being [FOSS](https://en.wikipedia.org/wiki/Free_and_open-source_software) MATLAB, on which CELES is implemented, is not.
+<del>Pyles will primarily be CPU-driven with a plan on utilizing [OpenCL](https://www.khronos.org/opencl/) down the road for more parallelization of the processes.
 
-Pyles will primarily be CPU-driven with a plan on utilizing [OpenCL](https://www.khronos.org/opencl/) down the road for more parallelization of the processes.
+The heavy lifting of pyles is realised using [numba](https://numba.pydata.org/) to parallelise the coupling matrix computation either on the CPU (see [here](https://numba.readthedocs.io/en/stable/user/performance-tips.html) some nice performance tips) or even GPU using CUDA (numba provides a CUDA [implementation](https://numba.readthedocs.io/en/stable/cuda/index.html)). This project is in early works and still incomplete, so performance improvements down the road are possible.
 
 ## Performance
 The latest profiler result can be viewser [here](https://www.speedscope.app/#title=Pyles%20main.py%20profile&profileURL=https%3A%2F%2Fraw.githubusercontent.com%2FAGBV%2Fpyles%2Fgh-pages%2Fprofile.speedscope.json).
@@ -23,3 +24,8 @@ Before a commit can be executed, the `pre-commit` hook will be triggered. This w
 To enable this on your end, please execute `git config --local core.hooksPath .githooks/` so the hooks in `.githooks` are used.
 
 If you rather prefere using [pre-commit](https://pre-commit.com/), a `.pre-commit-config.yaml` is also provided :)
+
+# Credits
+
+- This project is based on the already available work of the people from [disordered-photonics](https://github.com/disordered-photonics) and their [CELES](https://github.com/disordered-photonics/celes) implementation in Matlab. For the prototype, I am currently mostly implementing their functions 1:1 to python with small tweaks here and there. For more information regarding their work, lookup their mentioned repository or their [published paper](https://www.sciencedirect.com/science/article/abs/pii/S0022407317301772) on CELES. When this project hits its release and you consider useing it for your research, please cite their work [bibtext](https://github.com/disordered-photonics/celes/blob/master/doc/celes.bib)!
+- Thanks to H. T. Johansson and C. Forssén for the CPython implementation of their [WIGXJPF](http://fy.chalmers.se/subatom/wigxjpf/) project. More information on how it works is provided in [their publication](https://epubs.siam.org/doi/10.1137/15M1021908).
