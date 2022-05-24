@@ -41,11 +41,6 @@ jobs:
         run: |
           sed -i "s/<source>\/home\/runner\/work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/pyles/pyles/coverage.xml
 
-      # - name: Analysing the code with pylint
-      #   continue-on-error: true
-      #   run: |
-      #     pylint src/git_graph_automation
-
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
