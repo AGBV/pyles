@@ -191,6 +191,9 @@ class Simulation:
     
     log.info('Starting Wx computation')
     if self.numerics.gpu:
+      wx_real = np.zeros(x.shape + (wavelengths,), dtype=float)
+      wx_imag = np.zeros_like(wx_real)
+      
       idx_device                  = cuda.to_device(idx_lookup)
       x_device                    = cuda.to_device(x)
       wx_real_device              = cuda.to_device(wx_real)
@@ -207,9 +210,6 @@ class Simulation:
       blocks_per_grid_y = ceil(jmax         / threads_per_block[1])
       blocks_per_grid_z = ceil(wavelengths  / threads_per_block[2])
       blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_z)
-      
-      wx_real = np.zeros(x.shape + (wavelengths,), dtype=float)
-      wx_imag = np.zeros_like(wx_real)
 
       coupling_matrix_time = time()
       particle_interaction_gpu[blocks_per_grid,threads_per_block](lmax, particle_number,

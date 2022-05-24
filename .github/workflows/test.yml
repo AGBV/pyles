@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - "pyles/**"
+      - "src/**"
       - "tests/**"
       - ".github/workflows/test.yml"
       - "sonar-project.properties"
