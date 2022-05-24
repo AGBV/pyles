@@ -6,13 +6,13 @@ import numpy as np
 # import plotly.graph_objects as go
 # from functions.coupling_matrix_multiply import coupling_matrix_multiply
 
-from pyles.particles import Particles
-from pyles.initial_field import InitialField
-from pyles.parameters import Parameters
-from pyles.numerics import Numerics
-from pyles.simulation import Simulation
+from src.particles import Particles
+from src.initial_field import InitialField
+from src.parameters import Parameters
+from src.numerics import Numerics
+from src.simulation import Simulation
 
-from pyles.functions.misc import jmult_max
+from src.functions.misc import jmult_max
 
 logging.basicConfig(format='%(levelname)s (%(name)s): %(message)s', level=logging.INFO)
 
