@@ -8,7 +8,7 @@ sys.path.append(str(Path(__file__).parents[1]))
 import numpy as np
 import pandas as pd
 
-from pyles.functions.misc import jmult_max, multi2single_index, single_index2multi
+from src.functions.misc import jmult_max, multi2single_index, single_index2multi
 
 class TestSimulation(unittest.TestCase):
 

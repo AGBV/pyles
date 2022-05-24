@@ -3,30 +3,33 @@ import logging
 import numpy as np
 import sympy as sym
 import pywigxjpf as wig
-from scipy.special import legendre
 
-from pyles.functions.misc import jmult_max
-from pyles.functions.misc import multi2single_index
-from pyles.functions.legendre_normalized_trigon import legendre_normalized_trigon
+from src.functions.misc import jmult_max
+from src.functions.misc import multi2single_index
+from src.functions.legendre_normalized_trigon import legendre_normalized_trigon
 
 
 class Numerics:
-  def __init__(self, lmax, polar_angles, azimuthal_angles, gpu=False, particle_distance_resolution = 10.0):
+  def __init__(self, lmax, polar_angles, azimuthal_angles, gpu=False, particle_distance_resolution = 10.0, solver=None):
     self.lmax = lmax
     self.polar_angles = polar_angles
     self.azumuthal_angles = azimuthal_angles
-
     self.gpu = gpu
     self.particle_distance_resolution = particle_distance_resolution
+    self.solver = solver
 
-    self.nmax = 2 * lmax * (lmax + 2)
-    
     self.log = logging.getLogger(__name__)
+
+    if self.gpu:
+      from numba import cuda
+      if not cuda.is_available():
+        self.log.warning('No supported GPU in numba detected! Falling back to the CPU implementation.')
+        self.gpu = False
 
     self.__setup()
 
   def __compute_nmax(self):
-    self.nmax = jmult_max(1, self.lmax)
+    self.nmax = 2 * self.lmax * (self.lmax + 2)
 
   # https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.lpmn.html
   def __plm_coefficients(self):

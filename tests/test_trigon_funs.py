@@ -8,8 +8,8 @@ sys.path.append(str(Path(__file__).parents[1]))
 import numpy as np
 import pandas as pd
 
-from pyles.functions.spherical_functions_trigon import spherical_functions_trigon
-from pyles.functions.legendre_normalized_trigon import legendre_normalized_trigon
+from src.functions.spherical_functions_trigon import spherical_functions_trigon
+from src.functions.legendre_normalized_trigon import legendre_normalized_trigon
 
 # If pylint shows problems with np.testing, use @staticmethod
 # Source: https://stackoverflow.com/questions/61950738/using-numpy-testing-functions-with-unittest

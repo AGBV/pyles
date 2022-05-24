@@ -8,7 +8,7 @@ sys.path.append(str(Path(__file__).parents[1]))
 import numpy as np
 import pandas as pd
 
-from pyles.numerics import Numerics
+from src.numerics import Numerics
 
 class TestNumerics(unittest.TestCase):
 

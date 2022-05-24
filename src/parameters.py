@@ -1,7 +1,8 @@
+import wave
 import numpy as np
 
-from pyles.particles import Particles
-from pyles.initial_field import InitialField
+from src.particles import Particles
+from src.initial_field import InitialField
 
 class Parameters:
 
@@ -12,6 +13,7 @@ class Parameters:
 
     self.wavelength = wavelength
     self.medium_mefractive_index = medium_mefractive_index
+    self.wavelengths_number = wavelength.size
     self.particles = particles
     self.initial_field = initial_field
 

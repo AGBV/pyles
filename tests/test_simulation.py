@@ -8,11 +8,11 @@ sys.path.append(str(Path(__file__).parents[1]))
 import numpy as np
 import pandas as pd
 
-from pyles.particles import Particles
-from pyles.initial_field import InitialField
-from pyles.parameters import Parameters
-from pyles.numerics import Numerics
-from pyles.simulation import Simulation
+from src.particles import Particles
+from src.initial_field import InitialField
+from src.parameters import Parameters
+from src.numerics import Numerics
+from src.simulation import Simulation
 
 class TestSimulation(unittest.TestCase):
 
