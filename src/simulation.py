@@ -14,7 +14,6 @@ from src.parameters import Parameters
 from src.numerics import Numerics
 from src.functions.spherical_functions_trigon import spherical_functions_trigon
 from src.functions.t_entry import t_entry
-from src.functions.coupling_matrix_multiply import coupling_matrix_multiply
 
 from src.functions.misc import transformation_coefficients
 from src.functions.misc import multi2single_index
@@ -193,7 +192,7 @@ class Simulation:
     if self.numerics.gpu:
       wx_real = np.zeros(x.shape + (wavelengths,), dtype=float)
       wx_imag = np.zeros_like(wx_real)
-      
+
       idx_device                  = cuda.to_device(idx_lookup)
       x_device                    = cuda.to_device(x)
       wx_real_device              = cuda.to_device(wx_real)
