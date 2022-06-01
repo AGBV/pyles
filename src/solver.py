@@ -1,7 +1,7 @@
 import logging
 
 import numpy as np
-from scipy.sparse.linalg import LinearOperator, gmres, bicgstab
+from scipy.sparse.linalg import LinearOperator, gmres, lgmres, bicgstab
 
 class Solver:
   def __init__(self, solver_type: str='gmres', tolerance: float=1e-4, max_iter: int=1e4, restart: int=1e2):
@@ -13,47 +13,43 @@ class Solver:
     self.log = logging.getLogger(__name__)
 
   def run(self, A: LinearOperator, b: np.ndarray, x0: np.ndarray=None):
-    if x0 == None:
+    if x0 is None:
       x0 = np.copy(b)
 
+    
     if self.type == 'bicgstab':
-      value, info = bicgstab(A, b, x0, tol=self.tolerance, maxiter=self.max_iter)
+      counter = GMResCounter(callback_type='x')
+      value, err_code = bicgstab(A, b, x0, tol=self.tolerance, atol=0, maxiter=self.max_iter, callback=counter)
     elif self.type == 'gmres':
-      value, info = gmres(A, b, x0, restart=self.restart, tol=self.tolerance, atol=self.tolerance**2, maxiter=self.max_iter)
+      counter = GMResCounter(callback_type='pr_norm')
+      value, err_code = gmres(A, b, x0, restart=self.restart, tol=self.tolerance, atol=self.tolerance**2, maxiter=self.max_iter, callback=counter, callback_type='pr_norm')
+    elif self.type == 'lgmres':
+      counter = GMResCounter(callback_type='x')
+      value, err_code = lgmres(A, b, x0, tol=self.tolerance, atol=0, maxiter=self.max_iter, callback=counter)
     else:
       self.log.error('Please specify a valid solver type')
       exit(1)
 
-    return value, info
-  #   function [value,convergenceHistory] = run(obj,mmm,rhs,varargin)
-  #     if isempty(varargin)
-  #         initial_guess = gather(rhs);
-  #     else
-  #         initial_guess = varargin{1};
-  #     end
-  #     if length(varargin) > 1
-  #         verbose = varargin{2};
-  #     else
-  #         verbose = false;
-  #     end
+    return value, err_code
 
-  #     prh = @(x) gather(obj.preconditioner.run(x,verbose));
-
-  #     switch lower(obj.type)
-  #         case 'bicgstab'
-  #             [value,~,~,~,convergenceHistory] = ...
-  #                 bicgstab_custom(mmm,rhs,obj.tolerance,obj.maxIter,prh,[],initial_guess);
-  #         case 'gmres'
-  #             fh = str2func('gmres');
-  #             try
-  #                 fetch_and_patch_gmres();
-  #                 fh = str2func('gmres_monitor');
-  #             catch
-  #                 warning('using MATLAB default GMRES');
-  #             end
-  #             [value,~,~,~,convergenceHistory] = ...
-  #                 fh(mmm,rhs,obj.restart,obj.tolerance,obj.maxIter,prh,[],initial_guess);
-  #         otherwise
-  #             error('please specify a valid solver type')
-  #     end
-  # end
+class GMResCounter(object):
+  def __init__(self, disp=False, callback_type='pr_norm'):
+    self.log = logging.getLogger(__name__)
+    self._disp = disp
+    self.niter = 0
+    if callback_type == 'pr_norm':
+      self.header = '% 10s \t % 15s' % ('Iteration', 'Residual')
+    elif callback_type == 'x':
+      self.header = '% 10s \t %s' % ('Iteration', 'Current Iterate')
+  def __call__(self, rk=None):
+    self.niter += 1
+    if isinstance(rk, float):
+      msg = '% 10i \t % 15.5f' % (self.niter, rk)
+    elif isinstance(rk, np.ndarray):
+      msg = '% 10i \t ' % self.niter + np.array2string(rk)
+    
+    self.log.info(self.header)
+    self.log.info(msg)
+    if self._disp:
+      print(self.header)
+      print(msg)
