@@ -7,6 +7,7 @@ from src.simulation import Simulation
 class Optics:
   def __init__(self, simulation: Simulation):
     self.simulation = simulation
+    print("hi")
 
     self.log = logging.getLogger(__name__)
 
