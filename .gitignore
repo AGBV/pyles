@@ -4,10 +4,6 @@
 # Ignore speedscope files
 *.speedscope.json
 
-# Ignore json test data for now (big ones)
-# tests/data/scatter_sphere_parameters.json
-tests/data/simulation/*
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

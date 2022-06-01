@@ -119,13 +119,13 @@ class Simulation:
     self.log.info('compute initial field coefficients ...')
     
     if np.isfinite(self.parameters.initial_field.beam_width) and (self.parameters.initial_field.beam_width > 0):
-      self.log.info('  Gaussian beam ...')
+      self.log.info('\t Gaussian beam ...')
       if self.parameters.initial_field.normal_incidence:
         self.__compute_initial_field_coefficients_wavebundle_normal_incidence()
       else:
-        self.log.error('  this case is not implemented')
+        self.log.error('\t this case is not implemented')
     else:
-      self.log.info('  plane wave ...')
+      self.log.info('\t plane wave ...')
       self.__compute_initial_field_coefficients_planewave()
     
     self.log.info('done')
@@ -164,11 +164,10 @@ class Simulation:
   def __compute_initial_field_coefficients_wavebundle_normal_incidence(self):
     # TODO
     # https://github.com/disordered-photonics/celes/blob/master/src/initial/initial_field_coefficients_wavebundle_normal_incidence.m
-    self.initial_field_coefficients = None
+    self.initial_field_coefficients = np.zeros((self.parameters.particles.number, self.numerics.nmax, self.parameters.k_medium.size), dtype=complex) * np.nan
 
   def coupling_matrix_multiply(self, x: np.ndarray, idx: int=None):
-    log = logging.getLogger('coupling_matrix_multiply_numba')
-    log.info('prepare particle coupling ... ')
+    self.log.info('prepare particle coupling ... ')
     preparation_time = time()
 
     lmax = self.numerics.lmax
@@ -184,11 +183,11 @@ class Simulation:
 
     if idx != None:
       spherical_hankel_lookup = spherical_hankel_lookup[:,:,:,idx]
-      spherical_hankel_lookup = spherical_hankel_lookup[:,:,:,np.newaxis]
+      spherical_hankel_lookup = np.copy(spherical_hankel_lookup[:,:,:,np.newaxis])
       wavelengths = 1
 
     
-    log.info('Starting Wx computation')
+    self.log.info('\t Starting Wx computation')
     if self.numerics.gpu:
       wx_real = np.zeros(x.shape + (wavelengths,), dtype=float)
       wx_imag = np.zeros_like(wx_real)
@@ -220,15 +219,15 @@ class Simulation:
       wx = wx_real + 1j * wx_imag
       # particle_interaction.parallel_diagnostics(level=4)
       time_end = time()
-      log.info("Time taken for preparation: %f" % (coupling_matrix_time - preparation_time))
-      log.info("Time taken for coupling matrix: %f" % (time_end - coupling_matrix_time))
+      self.log.info("\t Time taken for preparation: %f" % (coupling_matrix_time - preparation_time))
+      self.log.info("\t Time taken for coupling matrix: %f" % (time_end - coupling_matrix_time))
     else:
       wx = particle_interaction(lmax, particle_number,
         idx_lookup, x,
         translation_table, associated_legendre_lookup, 
         spherical_hankel_lookup, e_j_dm_phi_loopup)
       time_end = time()
-      log.info("Time taken for coupling matrix: %f" % (time_end - preparation_time))
+      self.log.info("\t Time taken for coupling matrix: %f" % (time_end - preparation_time))
 
     if idx != None:
       wx = np.squeeze(wx)
@@ -241,24 +240,28 @@ class Simulation:
     self.log.info('apply T-matrix ...')
     t_matrix_start = time()
 
-    wx = wx.reshape((self.parameters.particles.number, self.numerics.nmax))
-    twx = self.mie_coefficients[self.parameters.particles.single_unique_array_idx, :, idx] * wx
-    mx = value - twx.ravel()
+    twx = self.mie_coefficients[self.parameters.particles.single_unique_array_idx, :, idx].ravel(order='C') * wx
+    mx = value - twx
 
     t_matrix_stop = time()
-    self.log.info(' done in %f seconds.' % (t_matrix_stop - t_matrix_start))
+    self.log.info('\t done in %f seconds.' % (t_matrix_stop - t_matrix_start))
 
     return mx
 
-  def compute_scattered_field_coefficients(self):
+  def compute_scattered_field_coefficients(self, guess=None):
     self.log.info('compute scattered field coefficients ...')
     jmax = self.parameters.particles.number * self.numerics.nmax
     self.scattered_field_coefficients = np.zeros_like(self.initial_field_coefficients)
+    self.scattered_field_err_codes = np.zeros(self.parameters.wavelengths_number)
+    # x0 = self.right_hand_side[:,:,0].ravel()
+    if guess is None:
+      guess = self.right_hand_side
     for w in range(self.parameters.wavelengths_number):
-      print(w)
       mmm = lambda x: self.master_matrix_multiply(x, w)
-      A = LinearOperator(shape=(jmax, jmax), matvec=mmm)
-      # b = self.right_hand_side[:,:,w]
-      b = self.right_hand_side[:,:,w].ravel()
-      x = self.numerics.solver.run(A, b)
-      self.scattered_field_coefficients[:,:,w] = x.reshape(b.shape)
+      A  = LinearOperator(shape=(jmax, jmax), matvec=mmm)
+      b  = self.right_hand_side[:,:,w].ravel()
+      x0 = guess[:,:,w].ravel()
+      self.log.info('Solver run %d/%d' % (w+1, self.parameters.wavelengths_number))
+      x, err_code = self.numerics.solver.run(A, b, x0)
+      self.scattered_field_coefficients[:,:,w] = x.reshape(self.right_hand_side.shape[:2])
+      self.scattered_field_err_codes[w] = err_code
