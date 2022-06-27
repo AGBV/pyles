@@ -23,6 +23,8 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+          
+      - name: cml_run
         run: |
           echo 'Hi from CML!' >> report.md
           cml send-comment report.md
