@@ -1,83 +1,150 @@
+#%% Import libs and set logging
 from time import time
 import logging
 
 import pandas as pd
 import numpy as np
-# import plotly.graph_objects as go
-# from functions.coupling_matrix_multiply import coupling_matrix_multiply
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 from src.particles import Particles
 from src.initial_field import InitialField
 from src.parameters import Parameters
+from src.solver import Solver
 from src.numerics import Numerics
 from src.simulation import Simulation
+from src.optics import Optics
 
-from src.functions.misc import jmult_max
+# logging.basicConfig(format='%(levelname)s (%(name)s): %(message)s', level=logging.INFO)
 
-logging.basicConfig(format='%(levelname)s (%(name)s): %(message)s', level=logging.INFO)
+#%% Set imputs
+spheres = pd.read_csv('data/sphere_parameters.csv', names = ['x', 'y', 'z', 'r', 'n', 'k']).to_numpy()
+spheres[:,5] = spheres[:,4] / 10
+wavelength = pd.read_csv('data/lambda.csv', header=None).to_numpy().squeeze()
+wavelength = wavelength[6::10]
 
-spheres = pd.read_csv('data/sphere_parameters.csv', names = ['x', 'y', 'z', 'r', 'n', 'k'])
-wavelength = pd.read_csv('data/lambda.csv', header=None).to_numpy()
+medium_mefractive_index = np.ones_like(wavelength) * 1.63
 lmax = 4
 
-mie_coefficients = pd.read_csv('data/test/mie_coefficients.csv', header=None).applymap(lambda val: complex(val.replace('i', 'j'))).to_numpy()
-translation_ab5_csv = pd.read_csv('data/test/translation_ab5.csv', header=None, dtype=str).applymap(lambda val: complex(val.replace('i', 'j'))).to_numpy()
-translation_ab5 = np.zeros((jmult_max(1, lmax), jmult_max(1, lmax), 2*lmax+1), dtype=complex)
-for k in range(translation_ab5_csv.shape[0]):
-  x = int(np.real(translation_ab5_csv[k, 0]))
-  y = int(np.real(translation_ab5_csv[k, 1]))
-  z = int(np.real(translation_ab5_csv[k, 2]))
-  translation_ab5[x, y, z] = translation_ab5_csv[k, 3]
+#%% Set up all objects
+particles = Particles(spheres[:,0:3], spheres[:,3], spheres[:,4:])
 
-particles = Particles(spheres.values[:,0:3], spheres.values[:,3], spheres.values[:,4:])
 initial_field = InitialField(beam_width=0,
                              focal_point=np.array((0,0,0)),
                              polar_angle=0,
                              azimuthal_angle=0,
-                             polarization='TE')
+                             polarization='UNP')
 
-wavelength = np.array([200])
-medium_mefractive_index_scalar = 1
-inputs = Parameters(wavelength=wavelength,
-                    medium_mefractive_index=np.ones(wavelength.shape) * medium_mefractive_index_scalar,
+parameters = Parameters(wavelength=wavelength,
+                    medium_mefractive_index=medium_mefractive_index,
                     particles=particles,
                     initial_field=initial_field)
+
+solver = Solver(solver_type='lgmres',
+                tolerance=5e-4,
+                max_iter=1000,
+                restart=500)
+
 numerics = Numerics(lmax=lmax,
-                    polar_angles=np.arange(0, np.pi * (1 + 1/5e3), np.pi / 5e3),
-                    azimuthal_angles=np.arange(0, np.pi * (2 + 1/1e2), np.pi / 1e2),
+                    sampling_points_number=[360, 180],
                     particle_distance_resolution=1,
-                    gpu=False)
+                    gpu=True,
+                    solver=solver)
 
-simulation = Simulation(inputs, numerics)
+simulation = Simulation(parameters, numerics)
+
+optics = Optics(simulation)
+
+
+#%% Run needed calculations
+particles.compute_volume_equivalent_area()
+numerics.compute_spherical_unity_vectors()
+numerics.compute_translation_table()
 simulation.compute_mie_coefficients()
-simulation.compute_translation_table()
+simulation.compute_initial_field_coefficients()
+simulation.compute_right_hand_side()
+simulation.compute_scattered_field_coefficients()
+optics.compute_cross_sections()
+optics.compute_phase_funcition()
+print('Done')
 
-#simulation.compute_initial_field_coefficients()
-#print(simulation.initial_field_coefficients)
+#%% Display values
+import plotly.io as pio
+png_renderer = pio.renderers['vscode']
 
-# coupling_matrix_multiply()
-# fig = go.Figure()
-# fig.add_trace(go.Scatter3d(
-#   x = spheres.x,
-#   y = spheres.y,
-#   z = spheres.z,
-#   mode = 'markers',
-#   marker = dict(
-#     sizemode = 'diameter',
-#     sizeref = 10,
-#     size = spheres.r * 2,
-#     color = spheres.r,
-#     opacity = 0.5
-#   )
-# ))
-# fig.add_trace(go.Scatter3d(
-#   x = particles.hull[:,0],
-#   y = particles.hull[:,1],
-#   z = particles.hull[:,2],
-#   mode = 'markers',
-#   marker = dict(
-#     color = "red",
-#     opacity = 1
-#   )
-# ))
+fig = make_subplots(rows=2, cols=2,
+  subplot_titles=('Extinction Cross Section', 'Scattering Cross Section', 'Albedo', 'Phase Function'),
+  specs=[[{'type': 'xy'}, {'type': 'xy'}],
+         [{'type': 'xy'}, {'type': 'polar'}]])
+
+fig.add_trace(
+  go.Scatter(
+    x = wavelength/1e3,
+    y = optics.c_ext,
+    mode = 'lines',
+    name = 'C ext'
+  ), row = 1, col = 1
+)
+
+fig.add_trace(
+  go.Scatter(
+    x = wavelength/1e3,
+    y = optics.c_sca,
+    mode = 'lines',
+    name = 'C sca'
+  ), row = 1, col = 2
+)
+
+fig.add_trace(
+  go.Scatter(
+    x = wavelength/1e3,
+    y = optics.albedo,
+    mode = 'lines',
+    name = 'w'
+  ), row = 2, col = 1
+)
+
+for w in range(len(wavelength)):
+  fig.add_trace(
+    go.Scatterpolar(
+      theta = np.rad2deg(optics.scattering_angles),
+      r = optics.phase_function[:, w],
+      mode = 'lines',
+      name = '%.2f&mu;m' % (wavelength[w] / 1e3),
+      subplot = 'polar'
+    ), row = 2, col = 2
+  )
+
+
+fig.update_layout(
+  xaxis1 = dict(
+    title='Wavelength',
+    ticksuffix='&mu;m'
+  ),
+  yaxis1 = dict(
+    title = 'C ext'
+  ),
+  xaxis2 = dict(
+    title = 'Wavelength',
+    ticksuffix = '&mu;m'
+  ),
+  yaxis2 = dict(
+    title = 'C sca'
+  ),
+  xaxis3 = dict(
+    title = 'Wavelength',
+    ticksuffix = '&mu;m'
+  ),
+  yaxis3 = dict(
+    title = 'Albedo'
+  ),
+  polar = dict(
+    radialaxis = dict(type = 'log'),
+    sector = [0, 180]
+  )
+)
+
+fig.write_image('main.png')
 # fig.show()
+
+# %%

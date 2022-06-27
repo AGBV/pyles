@@ -24,11 +24,6 @@ jobs:
           fetch-depth: 0
           lfs: false
 
-      - name: cml_run
-        run: |
-          echo 'Hi from CML!' >> report.md
-          cml send-comment report.md
-
       - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
@@ -58,13 +53,6 @@ jobs:
           path: coverage.xml
           retention-days: 1
 
-      # - name: Store in cache
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: ./coverage.xml
-      #     key: ${{ github.sha }}
-      #     # key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
-
   coverage:
     needs: unittest
     runs-on: ubuntu-latest
@@ -80,15 +68,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage-report
-
-      # - name: Restore from cache
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: ./coverage.xml
-      #     key: ${{ github.sha }}
-      #     # key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
-      #     # restore-keys: |
-      #     #   pyles-coverage-report-
 
       - run: |
           ls -la
