@@ -7,7 +7,7 @@
 #     paths:
 #       - "src/**"
 #       - "tests/**"
-#       - ".github/workflows/test.yml"
+#       - ".github/workflows/test-gh.yml"
 #       - "sonar-project.properties"
 
 # jobs:

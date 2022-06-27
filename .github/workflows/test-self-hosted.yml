@@ -50,7 +50,7 @@ jobs:
           sed -i "s/<source>\/home\/runner\/_work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/_work/pyles/pyles/coverage.xml
 
       - name: Store in cache
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: /home/runner/_work/pyles/pyles/*.xml
           key: pyles-coverage-report
@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: Restore from cache
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           path: /home/runner/work/pyles/pyles/*.xml
           key: pyles-coverage-report
