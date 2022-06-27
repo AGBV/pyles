@@ -2,8 +2,9 @@ import logging
 from time import time
 
 import numpy as np
-from numba import cuda
 from math import ceil
+from numba import cuda
+from numba_progress import ProgressBar
 from scipy.sparse.linalg import LinearOperator
 from scipy.spatial.distance import pdist, squareform
 from scipy.special import spherical_jn, spherical_yn
@@ -28,9 +29,13 @@ from src.functions.misc import multi2single_index
 # from .coupling_matrix.cpu.cffi.coupling_matrix import lib
 # from .coupling_matrix.coupling_matrix_cpu_cython import coupling_matrix_cpu_cython
 
-from src.functions.coupling_matrix.cpu.parallel import compute_idx_lookups
-from src.functions.coupling_matrix.cpu.parallel import particle_interaction
-from src.functions.coupling_matrix.gpu.cuda import particle_interaction_gpu
+# from src.functions.coupling_matrix.cpu.parallel import compute_idx_lookups
+# from src.functions.coupling_matrix.cpu.parallel import particle_interaction
+# from src.functions.coupling_matrix.gpu.cuda import particle_interaction_gpu
+
+from src.functions.coupling_matrix.cpu_numba import compute_idx_lookups
+from src.functions.coupling_matrix.cpu_numba import particle_interaction
+from src.functions.coupling_matrix.cuda_numba import particle_interaction_gpu
 
 class Simulation:
   """Pyles Simulation Class"""
@@ -59,6 +64,9 @@ class Simulation:
       self.h3_table[p, :, :] = spherical_jn(p, size_param) + 1j * spherical_yn(p, size_param)
       # self.h3_table[p, :, :] = np.sqrt(np.pi / size_param) * 2 /hankel1(p, size_param)
 
+  def __compute_idx_lookup(self):
+    self.idx_lookup = compute_idx_lookups(self.numerics.lmax, self.parameters.particles.number)
+
   def __compute_lookups(self):
     lookup_computation_time_start = time()
     lmax = self.numerics.lmax
@@ -77,17 +85,21 @@ class Simulation:
     size_param = np.outer(dists.ravel(), self.parameters.k_medium).reshape([particle_number, particle_number, self.parameters.k_medium.shape[0]])
 
     self.sph_h = np.zeros((2 * lmax + 1, particle_number, particle_number, self.parameters.k_medium.shape[0]), dtype=complex)
+    self.sph_j = np.zeros_like(self.sph_h)
     self.e_j_dm_phi = np.zeros((4 * lmax + 1, particle_number, particle_number), dtype=complex)
     self.plm = np.zeros(((lmax + 1) * (2 * lmax + 1), particle_number, particle_number))
 
     for p in range(2 * lmax + 1):
       # self.sph_h[p, :, :, :] = spherical_jn(p, size_param) + 1j * spherical_yn(p, size_param)
-      self.sph_h[p, :, :] = np.sqrt(np.divide(np.pi / 2, size_param, out=np.zeros_like(size_param), where=size_param != 0)) * hankel1(p + 1/2, size_param)
+      self.sph_h[p, :, :, :] = np.sqrt(np.divide(np.pi / 2, size_param, out=np.zeros_like(size_param), where=size_param != 0)) * hankel1(p + 1/2, size_param)
+      self.sph_j[p, :, :, :] = spherical_jn(p, size_param)
       self.e_j_dm_phi[p, :, :]            = np.exp(1j * (p - 2 * lmax) * phi)
       self.e_j_dm_phi[p + 2 * lmax, :, :] = np.exp(1j * p * phi)
       for absdm in range(p + 1):
         cml = np.sqrt((2 * p + 1) / 2 / np.prod(np.arange(p - absdm + 1, p + absdm + 1)))
         self.plm[p * (p + 1) // 2 + absdm, :, :] = cml * np.power(-1.0, absdm) * lpmv(absdm, p, ct)
+
+    self.sph_h = np.nan_to_num(self.sph_h, nan=0) + np.isnan(self.sph_h) * 1
     
     lookup_computation_time_stop = time()
     self.log.info('Computing lookup tables took %f s' % (lookup_computation_time_stop - lookup_computation_time_start))
@@ -95,6 +107,7 @@ class Simulation:
   def __setup(self):
     # self.__compute_lookup_particle_distances()
     # self.__compute_h3_table()
+    self.__compute_idx_lookup()
     self.__compute_lookups()
     # self.__compute_right_hand_side()
 
@@ -172,14 +185,14 @@ class Simulation:
 
     lmax = self.numerics.lmax
     particle_number = self.parameters.particles.number
+    jmax = particle_number * 2 * lmax * (lmax + 2)
     wavelengths = self.parameters.k_medium.shape[0]
     translation_table = self.numerics.translation_ab5
     associated_legendre_lookup = self.plm
     spherical_hankel_lookup = self.sph_h
     e_j_dm_phi_loopup = self.e_j_dm_phi
 
-    idx_lookup = np.empty((2 * lmax * (lmax + 2) * particle_number, 5), dtype=int)
-    idx_lookup = compute_idx_lookups(lmax, particle_number, idx_lookup)
+    idx_lookup = self.idx_lookup
 
     if idx != None:
       spherical_hankel_lookup = spherical_hankel_lookup[:,:,:,idx]
@@ -201,8 +214,6 @@ class Simulation:
       spherical_hankel_device     = cuda.to_device(spherical_hankel_lookup)
       e_j_dm_phi_device           = cuda.to_device(e_j_dm_phi_loopup)
 
-
-      jmax = particle_number * 2 * lmax * (lmax + 2)
       threads_per_block = (16, 16, 2)
       blocks_per_grid_x = ceil(jmax         / threads_per_block[0])
       blocks_per_grid_y = ceil(jmax         / threads_per_block[1])
@@ -222,10 +233,13 @@ class Simulation:
       self.log.info("\t Time taken for preparation: %f" % (coupling_matrix_time - preparation_time))
       self.log.info("\t Time taken for coupling matrix: %f" % (time_end - coupling_matrix_time))
     else:
+      num_iterations = jmax * jmax * wavelengths
+      progress = ProgressBar(total=num_iterations)
       wx = particle_interaction(lmax, particle_number,
         idx_lookup, x,
         translation_table, associated_legendre_lookup, 
-        spherical_hankel_lookup, e_j_dm_phi_loopup)
+        spherical_hankel_lookup, e_j_dm_phi_loopup,
+        progress)
       time_end = time()
       self.log.info("\t Time taken for coupling matrix: %f" % (time_end - preparation_time))
 

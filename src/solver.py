@@ -7,8 +7,8 @@ class Solver:
   def __init__(self, solver_type: str='gmres', tolerance: float=1e-4, max_iter: int=1e4, restart: int=1e2):
     self.type       = solver_type.lower()
     self.tolerance  = tolerance
-    self.max_iter   = max_iter
-    self.restart    = restart
+    self.max_iter   = int(max_iter)
+    self.restart    = int(restart)
 
     self.log = logging.getLogger(__name__)
 

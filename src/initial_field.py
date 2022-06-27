@@ -21,21 +21,18 @@ class InitialField:
     self.__setup()
 
   def __set_pol_idx(self):
-    if self.polarization.lower() == 'te':
+    if   (isinstance(self.polarization, str) and self.polarization.lower() == 'unp') or (isinstance(self.polarization, int) and self.polarization == 0):
+      # Unpolarized is also present in the MSTM output
+      self.pol = 0
+    elif (isinstance(self.polarization, str) and self.polarization.lower() == 'te')  or (isinstance(self.polarization, int) and self.polarization == 1):
+      # Coresponds to the perpendicular value found in MSTM
       self.pol = 1
-    elif self.polarization.lower() == 'tm':
+    elif (isinstance(self.polarization, str) and self.polarization.lower() == 'tm')  or (isinstance(self.polarization, int) and self.polarization == 2):
+      # Coresponds to the parallel value found in MSTM
       self.pol = 2
     else:
-      self.pol = 1
-      self.log.warning('{} is not a valid polarization type. Please use TE or TM. Reverting to TE'.format(self.polarization))
-    # match self.polarization.lower():
-    #   case 'te':
-    #     self.pol = 1
-    #   case 'tm':
-    #     self.pol = 2
-    #   case _:
-    #     self.pol = 1
-    #     self.log.warning('{} is not a valid polarization type. Please use TE or TM. Reverting to TE'.format(self.polarization))
+      self.pol = 0
+      self.log.warning('{} is not a valid polarization type. Please use TE or TM. Reverting to unpolarized'.format(self.polarization))
 
   def __set_normal_incidence(self):
     self.normal_incidence = np.abs(np.sin(self.polar_angle)) < 1e-5;

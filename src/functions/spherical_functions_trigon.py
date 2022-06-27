@@ -41,8 +41,8 @@ def spherical_functions_trigon(theta, lmax):
     for l in range(m,lmax):
       coeff1 = np.sqrt((2*l + 1) * (2*l + 3) / (l + 1 - m) / (l + 1 + m)) * ct
       coeff2 = np.sqrt((2*l + 3) * (l - m) * (l + m) / (2*l - 1) / (l + 1 - m) / (l + 1 + m))
-      plm[l+1,m,:] = coeff1 * plm[l,m,:] - coeff2 * plm[l-1,m,:]
-      pilm[l+1,m,:] = coeff1 * pilm[l,m,:] - coeff2 * pilm[l-1,m,:]
+      plm[l+1,m,:]   = coeff1 * plm[l,m,:]  - coeff2 * plm[l-1,m,:]
+      pilm[l+1,m,:]  = coeff1 * pilm[l,m,:] - coeff2 * pilm[l-1,m,:]
       taulm[l+1,m,:] = (l + 1) * ct * pilm[l+1,m,:] - (l + 1 + m) * np.sqrt((2 * l + 3) * (l + 1 -m) / (2 * l + 1) / (l + 1 + m)) * pilm[l,m,:]
   
   pilm  = np.reshape(pilm,  np.concatenate(([lmax+1, lmax+1], size)))

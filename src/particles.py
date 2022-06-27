@@ -17,13 +17,6 @@ class Particles:
       self.m = self.m[:,0] + 1j * self.m[:,1]
     elif self.m.shape[1] > 2:
       self.log.error('Refractive index should be either complex or a two column matrix!')
-    # match self.m.shape[1]:
-    #   case 1:
-        
-    #   case 2:
-    #     self.m = self.m[:,0] + 1j * self.m[:,1]
-    #   case _:
-    #     self.log.error('Refractive index should be either complex or a two column matrix!')
 
     self.number = r.shape[0]
     self.__setup_impl()
@@ -73,6 +66,10 @@ class Particles:
     hull = ConvexHull(self.pos)
     vert = self.pos[hull.vertices, :]
     self.max_particle_distance = max(pdist(vert))
+
+  def compute_volume_equivalent_area(self):
+    r3 = np.power(self.r, 3)
+    self.geometric_projection = np.pi * np.power(np.sum(r3), 2/3)
 
   def __setup_impl(self):
     self.compute_unique_refractive_indices()

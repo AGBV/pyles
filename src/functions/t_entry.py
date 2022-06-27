@@ -36,17 +36,3 @@ def t_entry(tau, l, k_medium, k_sphere, radius, field_type = 'scattered'):
       log = logging.getLogger('t_entry')
       log.warning('Not a valid field type provided. Returning None!')
       return None
-
-  # match (field_type, tau):
-  #   case ('scattered', 1):
-  #     return -(jmx * djx - jx * djmx) / (jmx * dhx - hx * djmx) # -b
-  #   case ('scattered', 2):
-  #     return -(m**2 * jmx * djx - jx * djmx) / (m**2 * jmx * dhx - hx * djmx) # -a
-  #   case ('internal', 1):
-  #     return (jx * dhx - hx * djx) / (jmx * dhx - hx * djmx); # c
-  #   case ('internal', 2):
-  #     return (m * jx * dhx - m * hx * djx) / (m**2 * jmx * dhx - hx * djmx); # d
-  #   case _:
-  #     log = logging.getLogger('t_entry')
-  #     log.warning('Not a valid field type provided. Returning None!')
-  #     return None
