@@ -53,9 +53,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./*.xml
-          key: pyles-coverage-report-${{ hashFiles('./*.xml') }}
-          restore-keys: |
-            pyles-coverage-report-
+          key: pyles-coverage-report
+          # key: pyles-coverage-report-${{ hashFiles('./*.xml') }}
+          # restore-keys: |
+          #   pyles-coverage-report-
 
   coverage:
     needs: unittest
@@ -72,9 +73,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./*.xml
-          key: pyles-coverage-report-${{ hashFiles('./*.xml') }}
-          restore-keys: |
-            pyles-coverage-report-
+          key: pyles-coverage-report
+
+      - run: ls -la
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
