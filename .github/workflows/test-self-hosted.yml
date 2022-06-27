@@ -47,12 +47,12 @@ jobs:
 
       - name: Override Coverage Source Path for Sonar
         run: |
-          sed -i "s/<source>\/home\/runner\/work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/pyles/pyles/coverage.xml
+          sed -i "s/<source>\/home\/runner\/_work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/_work/pyles/pyles/coverage.xml
 
       - uses: actions/cache@v3
         id: restore-coverage
         with:
-          path: /home/runner/work/pyles/pyles/coverage.xml
+          path: /home/runner/_work/pyles/pyles/coverage.xml
           key: pyles-coverage-report
 
   coverage:
@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@v3
         id: restore-coverage
         with:
-          path: /home/runner/work/pyles/pyles/coverage.xml
+          path: /home/runner/_work/pyles/pyles/coverage.xml
           key: pyles-coverage-report
 
       - name: SonarQube Scan
