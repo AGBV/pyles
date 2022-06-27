@@ -49,12 +49,13 @@ jobs:
         run: |
           sed -i "s/<source>\/home\/runner\/_work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/_work/pyles/pyles/coverage.xml
 
+      - run: ls -la
+
       - name: Store in cache
         uses: actions/cache@v2
         with:
-          path: ./*.xml
-          key: ${{ github.sha }}
-          # key: pyles-coverage-report-${{ hashFiles('./*.xml') }}
+          path: ./coverage.xml
+          key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
           # restore-keys: |
           #   pyles-coverage-report-
 
@@ -72,8 +73,8 @@ jobs:
       - name: Restore from cache
         uses: actions/cache@v2
         with:
-          path: ./*.xml
-          key: ${{ github.sha }}
+          path: ./coverage.xml
+          key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
 
       - run: ls -la
 
