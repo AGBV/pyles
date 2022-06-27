@@ -19,7 +19,8 @@ class TestOptics(unittest.TestCase):
   def test_cross_sections_and_phase_function(self):
     executions = 0
     module = 'mstm'
-    relative_precision = 6e-1
+    relative_precision_cs = 2e-3
+    relative_precision_p  = 6e-1
     for data_file in glob.glob('tests/data/%s_*.mat' % module):
 
       data = loadmat(data_file)
@@ -91,10 +92,10 @@ class TestOptics(unittest.TestCase):
       for w in range(optics.phase_function.shape[1]):
         phase_function[:, w] = np.interp(np.deg2rad(angle_test), optics.scattering_angles, optics.phase_function[:, w])
     
-      np.testing.assert_allclose(q_ext,  q_ext_test, relative_precision,                    0, True, 'The extinction efficiencies do not match.')
-      np.testing.assert_allclose(q_sca,  q_sca_test, relative_precision,                    0, True, 'The scattering efficiencies do not match.')
-      np.testing.assert_allclose(albedo, albedo_test, relative_precision,                   0, True, 'The albedos do not match.')
-      np.testing.assert_allclose(phase_function,  phase_function_test, relative_precision,  0, True, 'The phase function does not match.')
+      np.testing.assert_allclose(q_ext,  q_ext_test, relative_precision_cs,                   0, True, 'The extinction efficiencies do not match.')
+      np.testing.assert_allclose(q_sca,  q_sca_test, relative_precision_cs,                   0, True, 'The scattering efficiencies do not match.')
+      np.testing.assert_allclose(albedo, albedo_test, relative_precision_cs,                  0, True, 'The albedos do not match.')
+      np.testing.assert_allclose(phase_function,  phase_function_test, relative_precision_p,  0, True, 'The phase function does not match.')
 
       executions += 1
 
