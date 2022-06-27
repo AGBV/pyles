@@ -4,7 +4,6 @@ from time import time
 import numpy as np
 from math import ceil
 from numba import cuda
-from numba_progress import ProgressBar
 from scipy.sparse.linalg import LinearOperator
 from scipy.spatial.distance import pdist, squareform
 from scipy.special import spherical_jn, spherical_yn
@@ -233,8 +232,10 @@ class Simulation:
       self.log.info("\t Time taken for preparation: %f" % (coupling_matrix_time - preparation_time))
       self.log.info("\t Time taken for coupling matrix: %f" % (time_end - coupling_matrix_time))
     else:
-      num_iterations = jmax * jmax * wavelengths
-      progress = ProgressBar(total=num_iterations)
+      # from numba_progress import ProgressBar
+      # num_iterations = jmax * jmax * wavelengths
+      # progress = ProgressBar(total=num_iterations)
+      progress = None
       wx = particle_interaction(lmax, particle_number,
         idx_lookup, x,
         translation_table, associated_legendre_lookup, 

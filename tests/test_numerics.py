@@ -35,7 +35,7 @@ class TestNumerics(unittest.TestCase):
                     gpu=False,
                     particle_distance_resolution=1)
 
-
+      numerics.compute_translation_table()
       translation_table_test = np.array(data['output']['numerics']['translation_table'], dtype=complex)
 
       np.testing.assert_allclose(numerics.translation_ab5, translation_table_test, relative_precision, relative_precision**2, True, 'The translation table coefficients do not match.')
