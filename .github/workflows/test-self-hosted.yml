@@ -51,12 +51,19 @@ jobs:
 
       - run: ls -la
 
-      - name: Store in cache
-        uses: actions/cache@v2
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
         with:
-          path: ./coverage.xml
-          key: ${{ github.sha }}
-          # key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 1
+
+      # - name: Store in cache
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ./coverage.xml
+      #     key: ${{ github.sha }}
+      #     # key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
 
   coverage:
     needs: unittest
@@ -69,20 +76,24 @@ jobs:
           fetch-depth: 0
           lfs: false
 
-      - name: Restore from cache
-        uses: actions/cache@v2
+      - name: Download a single artifact
+        uses: actions/download-artifact@v3
         with:
-          path: ./coverage.xml
-          key: ${{ github.sha }}
-          # key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
-          # restore-keys: |
-          #   pyles-coverage-report-
+          name: coverage-report
+
+      # - name: Restore from cache
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ./coverage.xml
+      #     key: ${{ github.sha }}
+      #     # key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
+      #     # restore-keys: |
+      #     #   pyles-coverage-report-
 
       - run: |
           ls -la
           pwd
-          find / -name "coverage.xml"
-
+      
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
