@@ -47,25 +47,34 @@ jobs:
 
       - name: Override Coverage Source Path for Sonar
         run: |
-          sed -i "s/<source>\/home\/runner\/work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/pyles/pyles/coverage.xml
+          sed -i "s/<source>\/home\/runner\/_work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/_work/pyles/pyles/coverage.xml
 
       - name: Store in cache
         uses: actions/cache@v2
         with:
-          path: /home/runner/work/pyles/pyles/*.xml
-          key: pyles-coverage-report
+          path: ./*.xml
+          key: pyles-coverage-report-${{ hashFiles('./*.xml') }}
+          restore-keys: |
+            pyles-coverage-report-
 
   coverage:
     needs: unittest
     runs-on: ubuntu-latest
 
     steps:
-      - name: Restore from cache
+      - name: Set up Git repository
         uses: actions/checkout@v2
         with:
-          path: |
-            /home/runner/work/pyles/pyles/*.xml
-          key: pyles-coverage-report
+          fetch-depth: 0
+          lfs: false
+
+      - name: Restore from cache
+        uses: actions/cache@v2
+        with:
+          path: ./*.xml
+          key: pyles-coverage-report-${{ hashFiles('./*.xml') }}
+          restore-keys: |
+            pyles-coverage-report-
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
