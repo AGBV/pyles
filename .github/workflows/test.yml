@@ -22,8 +22,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          lfs: true
-          
+          lfs: false
+
       - name: cml_run
         run: |
           echo 'Hi from CML!' >> report.md
