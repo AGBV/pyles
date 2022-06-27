@@ -11,7 +11,7 @@ on:
       - "sonar-project.properties"
 
 jobs:
-  coverage:
+  unittest:
     runs-on:
       # - ubuntu-latest
       - self-hosted
@@ -48,6 +48,23 @@ jobs:
       - name: Override Coverage Source Path for Sonar
         run: |
           sed -i "s/<source>\/home\/runner\/work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/work/pyles/pyles/coverage.xml
+
+      - uses: actions/cache@v3
+        id: restore-coverage
+        with:
+          path: /home/runner/work/pyles/pyles/coverage.xml
+          key: pyles-coverage-report
+
+  coverage:
+    needs: unittest
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        id: restore-coverage
+        with:
+          path: /home/runner/work/pyles/pyles/coverage.xml
+          key: pyles-coverage-report
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
