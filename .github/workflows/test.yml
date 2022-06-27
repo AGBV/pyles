@@ -12,7 +12,10 @@ on:
 
 jobs:
   coverage:
-    runs-on: ubuntu-latest
+    runs-on:
+      # - ubuntu-latest
+      - self-hosted
+      - gpu
 
     steps:
       - name: Set up Git repository
@@ -20,6 +23,9 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+        run: |
+          echo 'Hi from CML!' >> report.md
+          cml send-comment report.md
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v2
