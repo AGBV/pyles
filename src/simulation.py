@@ -18,23 +18,9 @@ from src.functions.t_entry import t_entry
 from src.functions.misc import transformation_coefficients
 from src.functions.misc import multi2single_index
 
-# from scipy.special import spherical_jn, spherical_yn, lpmv
-# from scipy.spatial.distance import pdist, squareform
-
-# from .misc import multi2single_index, jmult_max
-# from .coupling_matrix.cpu.cffi.coupling_matrix.lib import coupling_matrix
-# import ctypes
-# import cffi
-# from .coupling_matrix.cpu.cffi.coupling_matrix import lib
-# from .coupling_matrix.coupling_matrix_cpu_cython import coupling_matrix_cpu_cython
-
-# from src.functions.coupling_matrix.cpu.parallel import compute_idx_lookups
-# from src.functions.coupling_matrix.cpu.parallel import particle_interaction
-# from src.functions.coupling_matrix.gpu.cuda import particle_interaction_gpu
-
-from src.functions.coupling_matrix.cpu_numba import compute_idx_lookups
-from src.functions.coupling_matrix.cpu_numba import particle_interaction
-from src.functions.coupling_matrix.cuda_numba import particle_interaction_gpu
+from src.functions.cpu_numba import compute_idx_lookups
+from src.functions.cpu_numba import particle_interaction
+from src.functions.cuda_numba import particle_interaction_gpu
 
 class Simulation:
   """Pyles Simulation Class"""

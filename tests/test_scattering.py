@@ -13,10 +13,6 @@ from scipy.io import loadmat
 
 from src.functions.misc import multi2single_index
 from src.functions.t_entry import t_entry
-# from src.functions.coupling_matrix_multiply import coupling_matrix_multiply
-# from pyles.functions.coupling_matrix_multiply import coupling_matrix_multiply_legacy
-# from pyles.functions.coupling_matrix_multiply import coupling_matrix_multiply_legacy_ab_free
-# from pyles.functions.coupling_matrix_multiply import coupling_matrix_multiply_numba
 
 from src.particles import Particles
 from src.initial_field import InitialField
