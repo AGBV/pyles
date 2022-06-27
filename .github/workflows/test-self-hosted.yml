@@ -59,6 +59,7 @@ jobs:
     needs: unittest
     runs-on: ubuntu-latest
 
+    steps:
       - name: Restore from cache
         uses: actions/checkout@v2
         with:
