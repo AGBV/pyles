@@ -121,9 +121,9 @@ class TestSimulation(unittest.TestCase):
     self.assertGreater(executions, 0, 'No test data provided to be run.')
 
   def test_scattered_field_coefficients(self):
-    np.set_printoptions(precision=4, edgeitems=3, linewidth=np.inf, suppress=True, formatter={
-      'complexfloat': lambda x: '% +11.4e% +11.4ej ' % (x.real, x.imag)
-    },floatmode='fixed')
+    # np.set_printoptions(precision=4, edgeitems=3, linewidth=np.inf, suppress=True, formatter={
+    #   'complexfloat': lambda x: '% +11.4e% +11.4ej ' % (x.real, x.imag)
+    # },floatmode='fixed')
     # import logging
     # logging.basicConfig(format='%(levelname)s (%(name)s): %(message)s', level=logging.INFO)
     executions = 0
