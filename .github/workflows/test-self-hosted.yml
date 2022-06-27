@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./*.xml
-          key: pyles-coverage-report
+          key: ${{ github.sha }}
           # key: pyles-coverage-report-${{ hashFiles('./*.xml') }}
           # restore-keys: |
           #   pyles-coverage-report-
@@ -73,7 +73,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./*.xml
-          key: pyles-coverage-report
+          key: ${{ github.sha }}
 
       - run: ls -la
 
