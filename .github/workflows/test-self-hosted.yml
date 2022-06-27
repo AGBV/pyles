@@ -56,8 +56,6 @@ jobs:
         with:
           path: ./coverage.xml
           key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
-          # restore-keys: |
-          #   pyles-coverage-report-
 
   coverage:
     needs: unittest
@@ -75,6 +73,8 @@ jobs:
         with:
           path: ./coverage.xml
           key: pyles-coverage-report-${{ hashFiles('./coverage.xml') }}
+          restore-keys: |
+            pyles-coverage-report-
 
       - run: ls -la
 
