@@ -35,6 +35,11 @@ jobs:
           pip install pytest pytest-cov coverage
           pip install -r requirements.txt
 
+      - name: Numba informations
+        run: |
+          numba -s >> report.md
+          cml send-comment report.md
+
       - name: Running pytest
         run: |
           python -m pytest -v --cov --cov-report=xml --cov-report=html
@@ -68,10 +73,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage-report
-
-      - run: |
-          ls -la
-          pwd
       
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master

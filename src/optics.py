@@ -30,10 +30,7 @@ class Optics:
 
     lmax = self.simulation.numerics.lmax
     particle_number = self.simulation.parameters.particles.number
-    jmax = particle_number * 2 * lmax * (lmax + 2)
     wavelengths = self.simulation.parameters.k_medium.shape[0]
-    #sfc = self.simulation.scattered_field_coefficients
-    sfc = f
     translation_table = self.simulation.numerics.translation_ab5
     associated_legendre_lookup = self.simulation.plm
     spherical_bessel_lookup = self.simulation.sph_j
@@ -46,7 +43,7 @@ class Optics:
       c_sca_imag = np.zeros_like(c_sca_real)
 
       idx_device                  = cuda.to_device(idx_lookup)
-      sfc_device                  = cuda.to_device(sfc)
+      sfc_device                  = cuda.to_device(f)
       c_sca_real_device           = cuda.to_device(c_sca_real)
       c_sca_imag_device           = cuda.to_device(c_sca_imag)
       translation_device          = cuda.to_device(translation_table)
@@ -54,6 +51,7 @@ class Optics:
       spherical_bessel_device     = cuda.to_device(spherical_bessel_lookup)
       e_j_dm_phi_device           = cuda.to_device(e_j_dm_phi_loopup)
 
+      jmax              = particle_number * 2 * lmax * (lmax + 2)
       threads_per_block = (16, 16, 2)
       blocks_per_grid_x = ceil(jmax         / threads_per_block[0])
       blocks_per_grid_y = ceil(jmax         / threads_per_block[1])
@@ -62,9 +60,9 @@ class Optics:
 
       compute_scattering_cross_section_gpu[blocks_per_grid,threads_per_block](
         lmax, particle_number, idx_device, sfc_device, 
-        c_sca_real_device, c_sca_imag_device,
         translation_device, associated_legendre_device, 
-        spherical_bessel_device, e_j_dm_phi_device)
+        spherical_bessel_device, e_j_dm_phi_device,
+        c_sca_real_device, c_sca_imag_device)
       c_sca_real = c_sca_real_device.copy_to_host()
       c_sca_imag = c_sca_imag_device.copy_to_host()
       c_sca = c_sca_real + 1j * c_sca_imag

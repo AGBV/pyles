@@ -1,17 +1,17 @@
 import numpy as np
-from numba import jit, prange, int64, complex128
+from numba import jit, prange, int64, complex128, uint64
 
 @jit(nopython=True, parallel=True, nogil=True, fastmath=True, cache=True)
 def particle_interaction(lmax: int, particle_number: int, idx: np.ndarray, x: np.ndarray, translation_table: np.ndarray, plm: np.ndarray, sph_h: np.ndarray, e_j_dm_phi, progress_proxy=None):
   
   jmax = particle_number * 2 * lmax * (lmax + 2)
-  wavelengths = sph_h.shape[-1]
+  channels = sph_h.shape[-1]
 
-  wx = np.zeros(x.size * wavelengths, dtype=complex128).reshape(x.shape + (wavelengths,))
+  wx = np.zeros(x.size * channels, dtype=complex128).reshape(x.shape + (channels,))
 
-  for w_idx in prange(jmax * jmax * wavelengths):
-    w     = w_idx %  wavelengths
-    j_idx = w_idx // wavelengths
+  for w_idx in prange(jmax * jmax * channels):
+    w     = w_idx %  channels
+    j_idx = w_idx // channels
     j1 = j_idx // jmax
     j2 = j_idx %  jmax
     s1, n1, tau1, l1, m1 = idx[j1, :]
@@ -59,16 +59,14 @@ def compute_idx_lookups(lmax: int, particle_number: int):
   return idx
 
 @jit(nopython=True, parallel=True, nogil=True, fastmath=True)
-def compute_scattering_cross_section(lmax: int, particle_number: int, idx: np.ndarray, sfc: np.ndarray, translation_table: np.ndarray, plm: np.ndarray, sph_h: np.ndarray, e_j_dm_phi, progress_proxy=None):
+def compute_scattering_cross_section(lmax: int, particle_number: int, idx: np.ndarray, sfc: np.ndarray, translation_table: np.ndarray, plm: np.ndarray, sph_h: np.ndarray, e_j_dm_phi: np.ndarray, progress_proxy=None):
   
   jmax = particle_number * 2 * lmax * (lmax + 2)
-  wavelengths = sph_h.shape[-1]
+  channels = sph_h.shape[-1]
 
-  c_sca_complex = np.zeros(wavelengths, dtype=complex128)
+  c_sca_complex = np.zeros(channels, dtype=complex128)
 
-  for w_idx in prange(jmax * jmax * wavelengths):
-    w     = w_idx %  wavelengths
-    j_idx = w_idx // wavelengths
+  for j_idx in prange(jmax * jmax):
     j1 = j_idx // jmax
     j2 = j_idx %  jmax
     s1, n1, _, _, m1 = idx[j1, :]
@@ -76,19 +74,14 @@ def compute_scattering_cross_section(lmax: int, particle_number: int, idx: np.nd
 
     delta_m = np.absolute(m1 - m2);
 
-    f = sfc[:,:,w]
-
-    val = 0j
-    for p in range(2 * lmax + 1):
-      if delta_m > p:
-        continue
-
-      val += (translation_table[n2, n1, p] *
+    p_dependent = np.zeros(channels, dtype=complex128)
+    for p in range(delta_m, 2 * lmax + 1):
+      p_dependent += (translation_table[n2, n1, p] *
         plm[p * (p + 1) // 2 + delta_m, s1, s2] * 
-        sph_h[p, s1, s2, w])
-    val *= np.conj(f[s1, n1]) * e_j_dm_phi[m2 - m1 + 2 * lmax, s1, s2] * f[s2, n2]
+        sph_h[p, s1, s2, :])
+    p_dependent *= np.conj(sfc[s1, n1, :]) * e_j_dm_phi[m2 - m1 + 2 * lmax, s1, s2] * sfc[s2, n2, :]
 
-    c_sca_complex[w] += val
+    c_sca_complex += p_dependent
 
     if progress_proxy is not None:
       progress_proxy.update(1)

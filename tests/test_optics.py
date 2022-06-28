@@ -1,3 +1,4 @@
+from time import monotonic
 import unittest
 import glob
 
@@ -76,8 +77,15 @@ class TestOptics(unittest.TestCase):
       simulation.compute_right_hand_side()
       simulation.compute_scattered_field_coefficients()
 
+      t1 = monotonic()
       optics.compute_cross_sections()
+      t2 = monotonic()
+      print(t2 - t1)
+
+      t1 = monotonic()
       optics.compute_phase_funcition(legendre_coefficients_number=15, c_and_b=([-np.inf, 0], [np.inf, 1]))
+      t2 = monotonic()
+      print(t2 - t1)
 
       q_ext_test = data['q_ext'].squeeze()
       q_sca_test = data['q_sca'].squeeze()
@@ -91,9 +99,9 @@ class TestOptics(unittest.TestCase):
       phase_function = np.empty((angle_test.size, optics.phase_function.shape[1]))
       for w in range(optics.phase_function.shape[1]):
         phase_function[:, w] = np.interp(np.deg2rad(angle_test), optics.scattering_angles, optics.phase_function[:, w])
-    
-      np.testing.assert_allclose(q_ext,  q_ext_test, relative_precision_cs,                   0, True, 'The extinction efficiencies do not match.')
-      np.testing.assert_allclose(q_sca,  q_sca_test, relative_precision_cs,                   0, True, 'The scattering efficiencies do not match.')
+      
+      np.testing.assert_allclose(q_ext,  q_ext_test,  relative_precision_cs,                  0, True, 'The extinction efficiencies do not match.')
+      np.testing.assert_allclose(q_sca,  q_sca_test,  relative_precision_cs,                  0, True, 'The scattering efficiencies do not match.')
       np.testing.assert_allclose(albedo, albedo_test, relative_precision_cs,                  0, True, 'The albedos do not match.')
       np.testing.assert_allclose(phase_function,  phase_function_test, relative_precision_p,  0, True, 'The phase function does not match.')
 
