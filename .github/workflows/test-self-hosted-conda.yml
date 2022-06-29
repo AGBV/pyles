@@ -36,7 +36,8 @@ jobs:
           miniconda-version: "latest"
           activate-environment: pyles-conda
           environment-file: conda-env.yml
-          auto-activate-base: false
+          use-only-tar-bz2: true
+          # auto-activate-base: false
           #python-version: 3.10
           #condarc-file: etc/example-condarc.yml
       - run: |
