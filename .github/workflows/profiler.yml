@@ -11,7 +11,9 @@ on:
 
 jobs:
   docs:
-    runs-on: ubuntu-latest
+    runs-on: 
+      - self-hosted
+      - gpu
 
     permissions:
       contents: write
@@ -31,26 +33,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install py-spy
+          pip install py-spy plotly kaleido
           pip install -r requirements.txt
 
       - name: Generate Profile
         run: |
           py-spy record --nonblocking --format speedscope --output profile.speedscope.json -- python3 main.py
 
-      - name: Commit documentation changes
+      - name: Send image as commit
         run: |
-          git clone https://github.com/agbv/pyles.git --branch gh-pages --single-branch gh-pages
-          cp profile.speedscope.json gh-pages/
-          cd gh-pages
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Genereate profiler data" -a || true
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: gh-pages
-          directory: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          cml publish ./main.png --md >> report.md
+          cml send-comment report.md
