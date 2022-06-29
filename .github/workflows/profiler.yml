@@ -37,13 +37,43 @@ jobs:
           use-only-tar-bz2: true
           auto-activate-base: false
 
+      - name: Get Date
+        id: get-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
+
+      - name: Cache Conda env
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('etc/example-environment-caching.yml') }}-${{ env.CACHE_NUMBER }}
+        env:
+          CACHE_NUMBER: 0
+        id: cache
+
+      # - uses: conda-incubator/setup-miniconda@v2
+      #   with:
+      #     miniconda-version: "latest"
+      #     activate-environment: pyles-conda
+      #     environment-file: conda-env.yml
+      #     use-only-tar-bz2: true
+      #     auto-activate-base: false
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          activate-environment: pyles-conda
+          use-only-tar-bz2: true
+
+      - name: Update environment
+        run: conda env update -n pyles-conda -f conda-env.yml
+        if: steps.cache.outputs.cache-hit != 'true'
+
       - name: Install profiler dependencies
         run: |
           pip install py-spy
           conda install -c plotly plotly
           conda install -c conda-forge python-kaleido
-          
-      - run: echo $CONDA
 
       - name: Generate Profile
         run: |
