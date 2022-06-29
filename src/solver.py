@@ -12,20 +12,20 @@ class Solver:
 
     self.log = logging.getLogger(__name__)
 
-  def run(self, A: LinearOperator, b: np.ndarray, x0: np.ndarray=None):
+  def run(self, a: LinearOperator, b: np.ndarray, x0: np.ndarray=None):
     if x0 is None:
       x0 = np.copy(b)
 
     
     if self.type == 'bicgstab':
       counter = GMResCounter(callback_type='x')
-      value, err_code = bicgstab(A, b, x0, tol=self.tolerance, atol=0, maxiter=self.max_iter, callback=counter)
+      value, err_code = bicgstab(a, b, x0, tol=self.tolerance, atol=0, maxiter=self.max_iter, callback=counter)
     elif self.type == 'gmres':
       counter = GMResCounter(callback_type='pr_norm')
-      value, err_code = gmres(A, b, x0, restart=self.restart, tol=self.tolerance, atol=self.tolerance**2, maxiter=self.max_iter, callback=counter, callback_type='pr_norm')
+      value, err_code = gmres(a, b, x0, restart=self.restart, tol=self.tolerance, atol=self.tolerance**2, maxiter=self.max_iter, callback=counter, callback_type='pr_norm')
     elif self.type == 'lgmres':
       counter = GMResCounter(callback_type='x')
-      value, err_code = lgmres(A, b, x0, tol=self.tolerance, atol=0, maxiter=self.max_iter, callback=counter)
+      value, err_code = lgmres(a, b, x0, tol=self.tolerance, atol=0, maxiter=self.max_iter, callback=counter)
     else:
       self.log.error('Please specify a valid solver type')
       exit(1)

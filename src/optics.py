@@ -182,9 +182,7 @@ class Optics:
       self.c_and_b_bounds = ([-1, 0], [1, 1])
       self.log.warning('Number of parameters need to be 2 (b,c) or 3 (b1,b2,c). Reverting to two parameters (b,c) and setting the bounds to standard: b in [0, 1] and c in [-1, 1]')
 
-    # from scipy.optimize import leastsq
     from scipy.optimize import least_squares
-
     if len(self.c_and_b_bounds) == 2:
       bc0 = np.array([0, 0.5])
     else:

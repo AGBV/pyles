@@ -92,6 +92,8 @@ class Numerics:
     wig.wig_table_init(max_two_j, 3)
     wig.wig_temp_init(max_two_j)
 
+    # Needs to be paralilized or the loop needs to be shortened!
+    # Probably using one/two loop(s) and index using the lookup table.
     for tau1 in range(1,3):
       for l1 in range(1,self.lmax+1):
         for m1 in range(-l1, l1+1):
@@ -106,22 +108,20 @@ class Numerics:
                       np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
                       (l1 * (l1 + 1) + l2 * (l2 + 1) - p * (p + 1)) * np.sqrt(2 * p + 1) * \
                       wig.wig3jj_array(2 * np.array([l1, l2, p, m1, -m2, -m1+m2])) * wig.wig3jj_array(2 * np.array([l1, l2, p, 0, 0, 0]))
-                      # wig.wig3jj(2 * l1, 2 * l2, 2 * p, 2 * m1, -2 * m2, 2 * (-m1+m2)) * wig.wig3jj(2 * l1, 2 * l2, 2 * p, 0, 0, 0)
                   elif p > 0:
                     self.translation_ab5[j1,j2,p] = np.power(1j, abs(m1 - m2) - abs(m1) - abs(m2) + l2 - l1 + p) * np.power(-1.0, m1-m2) * \
                       np.sqrt((2 * l1 + 1) * (2 * l2 + 1) / (2 * l1 * (l1 + 1) * l2 * (l2 + 1))) * \
                       np.lib.scimath.sqrt((l1 + l2 + 1 + p) * (l1 + l2 + 1 - p) * (p + l1 - l2) * (p - l1 + l2) * (2 * p + 1)) * \
                       wig.wig3jj_array(2 * np.array([l1, l2, p, m1, -m2, -m1+m2])) * wig.wig3jj_array(2 * np.array([l1, l2, p-1, 0, 0, 0]))
-                      # wig.wig3jj(2 * l1, 2 * l2, 2 * p, 2 * m1, -2 * m2, 2 * (-m1+m2)) * wig.wig3jj(2 * l1, 2 * l2, 2 * (p-1), 0, 0, 0)
 
     wig.wig_table_free()
     wig.wig_temp_free()
 
   @staticmethod
   def compute_fibonacci_sphere_points(n=100):
-    goldenRatio = (1 + 5**0.5) / 2
+    golden_ratio = (1 + 5**0.5) / 2
     i = np.arange(0, n)
-    phi = 2 * np.pi * (i / goldenRatio % 1)
+    phi = 2 * np.pi * (i / golden_ratio % 1)
     theta = np.arccos(1 - 2 * i / n)
 
     return np.stack((

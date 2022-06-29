@@ -47,7 +47,6 @@ class Simulation:
 
     for p in range(2 * self.numerics.lmax + 1):
       self.h3_table[p, :, :] = spherical_jn(p, size_param) + 1j * spherical_yn(p, size_param)
-      # self.h3_table[p, :, :] = np.sqrt(np.pi / size_param) * 2 /hankel1(p, size_param)
 
   def __compute_idx_lookup(self):
     self.idx_lookup = compute_idx_lookups(self.numerics.lmax, self.parameters.particles.number)
@@ -75,7 +74,6 @@ class Simulation:
     self.plm = np.zeros(((lmax + 1) * (2 * lmax + 1), particle_number, particle_number))
 
     for p in range(2 * lmax + 1):
-      # self.sph_h[p, :, :, :] = spherical_jn(p, size_param) + 1j * spherical_yn(p, size_param)
       self.sph_h[p, :, :, :] = np.sqrt(np.divide(np.pi / 2, size_param, out=np.zeros_like(size_param), where=size_param != 0)) * hankel1(p + 1/2, size_param)
       self.sph_j[p, :, :, :] = spherical_jn(p, size_param)
       self.e_j_dm_phi[p, :, :]            = np.exp(1j * (p - 2 * lmax) * phi)
@@ -254,7 +252,6 @@ class Simulation:
     jmax = self.parameters.particles.number * self.numerics.nmax
     self.scattered_field_coefficients = np.zeros_like(self.initial_field_coefficients)
     self.scattered_field_err_codes = np.zeros(self.parameters.wavelengths_number)
-    # x0 = self.right_hand_side[:,:,0].ravel()
     if guess is None:
       guess = self.right_hand_side
     for w in range(self.parameters.wavelengths_number):
