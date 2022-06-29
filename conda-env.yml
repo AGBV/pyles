@@ -1,0 +1,22 @@
+name: pyles-conda
+prefix: ./pyles-conda
+channels:
+  - numba
+  - conda-forge
+  - defaults
+variables:
+  NUMBA_DISABLE_INTEL_SVML: 0
+  NUMBA_CUDA_USE_NVIDIA_BINDING: 0
+dependencies:
+  - cudatoolkit=10.1
+  - icc_rt
+  - numba
+  - numpy
+  - pandas
+  - pip
+  - plotly
+  - psutil
+  - scipy
+  - pip:
+    - pywigxjpf
+    - numba_progress

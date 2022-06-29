@@ -27,7 +27,7 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: pyles-conda
-          environment-file: conda-env.yml
+          environment-file: ./conda-env.yml
           auto-activate-base: false
           #python-version: 3.10
           #condarc-file: etc/example-condarc.yml
