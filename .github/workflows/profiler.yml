@@ -39,7 +39,9 @@ jobs:
 
       - name: Install profiler dependencies
         run: |
-          conda install py-spy plotly kaleido
+          pip install py-spy
+          conda install -c plotly plotly
+          conda install -c conda-forge python-kaleido
           
       - run: echo $CONDA
 
