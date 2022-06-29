@@ -46,6 +46,7 @@ jobs:
       
       - run: |
           # conda env create --force -f conda-env.yml
+          conda init bash
           conda activate pyles-conda
           conda info
           conda list
