@@ -48,7 +48,6 @@ def compute_idx_lookups(lmax: int, particle_number: int):
       for l in range(1, lmax+1):
         for m in range(-l, l+1):
           n = (tau - 1) * lmax * (lmax + 2) + (l - 1) * (l + 1) + l + m
-          #i = s + n * particle_number
           i = n + s * nmax
           idx[i, 0] = s
           idx[i, 1] = n

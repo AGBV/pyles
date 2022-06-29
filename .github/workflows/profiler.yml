@@ -15,6 +15,10 @@ jobs:
       - self-hosted
       - gpu
 
+    defaults:
+      run:
+        shell: bash -l {0}
+
     permissions:
       contents: write
       packages: write
