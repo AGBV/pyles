@@ -13,9 +13,8 @@ on:
 jobs:
   unittest:
     runs-on:
-      - ubuntu-latest
-      # - self-hosted
-      # - gpu
+      - self-hosted
+      - gpu
 
     steps:
       - name: Set up Git repository
@@ -23,6 +22,14 @@ jobs:
         with:
           fetch-depth: 0
           lfs: false
+
+      - name: Cache conda
+        uses: actions/cache@v2
+        env:
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('conda-env.yml') }}
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
