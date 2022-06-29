@@ -16,6 +16,10 @@ jobs:
       - self-hosted
       - gpu
 
+    defaults:
+      run:
+        shell: bash -l {0}
+
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v2
@@ -44,12 +48,12 @@ jobs:
           conda info
           conda list
       
-      - run: |
-          # conda env create --force -f conda-env.yml
-          conda init bash
-          conda activate pyles-conda
-          conda info
-          conda list
+      # - run: |
+      #     # conda env create --force -f conda-env.yml
+      #     conda init bash
+      #     conda activate pyles-conda
+      #     conda info
+      #     conda list
 
       - run: |
           numba -s
