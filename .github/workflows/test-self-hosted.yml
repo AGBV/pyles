@@ -37,45 +37,44 @@ jobs:
 
       - name: Numba informations
         run: |
-          numba -s >> report.md
-          cml send-comment report.md
+          numba -s
 
-      - name: Running pytest
-        run: |
-          python -m pytest -v --cov --cov-report=xml --cov-report=html
-          python -m coverage xml -i
+  #     - name: Running pytest
+  #       run: |
+  #         python -m pytest -v --cov --cov-report=xml --cov-report=html
+  #         python -m coverage xml -i
 
-      - name: Override Coverage Source Path for Sonar
-        run: |
-          sed -i "s/<source>\/home\/runner\/_work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/_work/pyles/pyles/coverage.xml
+  #     - name: Override Coverage Source Path for Sonar
+  #       run: |
+  #         sed -i "s/<source>\/home\/runner\/_work\/pyles\/pyles<\/source>/<source>\/github\/workspace<\/source>/g" /home/runner/_work/pyles/pyles/coverage.xml
 
-      - run: ls -la
+  #     - run: ls -la
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: coverage.xml
-          retention-days: 1
+  #     - name: Upload Artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: coverage-report
+  #         path: coverage.xml
+  #         retention-days: 1
 
-  coverage:
-    needs: unittest
-    runs-on: ubuntu-latest
+  # coverage:
+  #   needs: unittest
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Set up Git repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          lfs: false
+  #   steps:
+  #     - name: Set up Git repository
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #         lfs: false
 
-      - name: Download a single artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-report
+  #     - name: Download a single artifact
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: coverage-report
       
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  #     - name: SonarQube Scan
+  #       uses: sonarsource/sonarqube-scan-action@master
+  #       env:
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
