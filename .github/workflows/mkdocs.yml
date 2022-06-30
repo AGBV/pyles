@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout master
         uses: actions/checkout@v2
+        with:
+          lfs: false
 
       - name: Deploy docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
