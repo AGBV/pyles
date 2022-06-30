@@ -1,0 +1,30 @@
+site_name: Pyles
+site_url: 'http://129.217.143.181:8080'
+
+theme:
+  name: "material"
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      watch:
+        - src
+      default_handler: python
+      handlers:
+        python:
+          selection:
+            docstring_style: "numpy"
+          options:
+            show_source: false
+            members_order: source
+
+markdown_extensions:
+    - mdx_math:
+        enable_dollar_delimiter: True
+
+extra_css:
+  - css/mkdocstrings.css
+
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML
