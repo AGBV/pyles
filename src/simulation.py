@@ -123,7 +123,7 @@ class Simulation:
         - Spherical Bessel function $j_n$
         - Spherical Hankel function $h_n^{(1)}$
         - Associated Legendre polynomial values $P_l^m$
-        - Exponential function value $e^{j (m_2-m_1) \phi}$
+        - Exponential function value $e^{j (m_2-m_1) \\phi}$
 
         Attributes
         ----------
@@ -240,6 +240,18 @@ class Simulation:
                                                                        radius=np.real(self.parameters.particles.unique_radius_index_pairs[u_i, 0]))
 
     def compute_initial_field_coefficients(self):
+        """
+        Computes initial field coefficients $a_{\\tau ,l,m}$ and $b_{\\tau ,l,m}$.
+        Depending on the `beam_width`, one of two functions is called:
+
+        - [__compute_initial_field_coefficients_wavebundle_normal_incidence][src.simulation.Simulation.__compute_initial_field_coefficients_wavebundle_normal_incidence], $\\text{beam width} \\in (0, \\infty)$
+        - [__compute_initial_field_coefficients_planewave][src.simulation.Simulation.__compute_initial_field_coefficients_planewave], $\\text{beam width} = 0$ or $\\text{beam width} = \\infty$
+
+        Attributes
+        ----------
+        initial_field_coefficients : np.ndarray
+            Initial field coefficients
+        """
         self.log.info('compute initial field coefficients ...')
 
         if np.isfinite(self.parameters.initial_field.beam_width) and (self.parameters.initial_field.beam_width > 0):
@@ -291,8 +303,11 @@ class Simulation:
                         pilm, taulm, tau, l, m, self.parameters.initial_field.pol, dagger=True)
 
     def __compute_initial_field_coefficients_wavebundle_normal_incidence(self):
-        # TODO
-        # https://github.com/disordered-photonics/celes/blob/master/src/initial/initial_field_coefficients_wavebundle_normal_incidence.m
+        """
+        TODO
+        ----
+        Implement this function using the celes function [initial_field_coefficients_wavebundle_normal_incidence.m](https://github.com/disordered-photonics/celes/blob/master/src/initial/initial_field_coefficients_wavebundle_normal_incidence.m)
+        """
         self.initial_field_coefficients = np.zeros(
             (self.parameters.particles.number, self.numerics.nmax, self.parameters.k_medium.size), dtype=complex) * np.nan
 

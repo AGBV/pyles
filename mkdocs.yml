@@ -46,7 +46,7 @@ plugins:
             docstring_section_style: table
             members_order: source
             merge_init_into_class: true
-            separate_signature: true
+            separate_signature: false
             show_if_no_docstring: true
             show_source: true
             show_root_full_path: false
