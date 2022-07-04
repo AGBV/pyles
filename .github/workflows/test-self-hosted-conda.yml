@@ -62,12 +62,19 @@ jobs:
 
       - run: ls -la
 
-      - name: Upload Artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
           path: coverage.xml
           retention-days: 1
+
+      - name: Deploy docs with new coverage
+        uses: mhausenblas/mkdocs-deploy-gh-pages@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONFIG_FILE: mkdocs.yml
+          REQUIREMENTS: docs/requirements.txt
 
   coverage:
     needs: unittest
@@ -80,7 +87,7 @@ jobs:
           fetch-depth: 0
           lfs: false
 
-      - name: Download a single artifact
+      - name: Download artifact
         uses: actions/download-artifact@v3
         with:
           name: coverage-report

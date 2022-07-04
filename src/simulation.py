@@ -192,13 +192,35 @@ class Simulation:
             lookup_computation_time_stop - lookup_computation_time_start))
 
     def __setup(self):
-        # self.__compute_lookup_particle_distances()
-        # self.__compute_h3_table()
+        """
+        An internal setup function called upon object creation.
+        The following functions are called:
+
+        - [__compute_idx_lookups][src.simulation.Simulation.__compute_idx_lookup]
+        - [__compute_lookups][src.simulation.Simulation.__compute_lookups]
+        """
         self.__compute_idx_lookup()
         self.__compute_lookups()
-        # self.__compute_right_hand_side()
 
     def compute_mie_coefficients(self):
+        """
+        Computes the mie coefficients for the unique pair
+        of particle radius and the refractive index of the particle.
+
+        Attributes
+        ----------
+        mie_coefficients : np.ndarray
+            Mie coefficients table
+
+        See Also
+        --------
+        [t_entry][src.functions.t_entry.t_entry] : T-Matrix entry function
+
+        Notes
+        -----
+        Due to the four nested loops (particles, tau, l, and m),
+        it could be rewritten using `numba` to speed the process up.
+        """
         self.mie_coefficients = np.zeros(
             (self.parameters.particles.num_unique_pairs,
              self.numerics.nmax,
@@ -214,8 +236,7 @@ class Simulation:
                         self.mie_coefficients[u_i, jmult, :] = t_entry(tau=tau, l=l,
                                                                        k_medium=self.parameters.k_medium,
                                                                        k_sphere=self.parameters.omega *
-                                                                       self.parameters.particles.unique_radius_index_pairs[
-                                                                           u_i, 1],
+                                                                       self.parameters.particles.unique_radius_index_pairs[u_i, 1],
                                                                        radius=np.real(self.parameters.particles.unique_radius_index_pairs[u_i, 0]))
 
     def compute_initial_field_coefficients(self):
