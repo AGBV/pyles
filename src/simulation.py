@@ -267,6 +267,18 @@ class Simulation:
         self.log.info('done')
 
     def compute_right_hand_side(self):
+        """
+        The right hand side $T \\cdot a_I$ of the equation $M \\cdot b = T \\cdot a_I$ is computed.
+
+        Attributes
+        ----------
+        right_hand_side : np.ndarray
+            Right hand side of $M \\cdot b = T \\cdot a_I$
+        
+        Notes
+        -----
+        For more information regarding the equation, please have a look at the paper of [Celes](https://arxiv.org/abs/1706.02145).
+        """
         self.right_hand_side = self.mie_coefficients[self.parameters.particles.single_unique_array_idx,
                                                      :] * self.initial_field_coefficients
 

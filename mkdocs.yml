@@ -32,7 +32,7 @@ plugins:
   - autorefs
   - coverage:
       page_name: coverage
-      html_report_dir: htmlcov
+      html_report_dir: coverage-report/htmlcov
   - search:
       lang: end
   - mkdocstrings:
