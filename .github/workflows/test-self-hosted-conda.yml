@@ -66,8 +66,10 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: coverage.xml
-          retention-days: 1
+          path: |
+            coverage.xml
+            htmlcov/
+          retention-days: 30
 
       - name: Deploy docs with new coverage
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
@@ -77,6 +79,7 @@ jobs:
           REQUIREMENTS: docs/requirements.txt
 
   coverage:
+    name: Sonarqube coverage report
     needs: unittest
     runs-on: ubuntu-latest
 
